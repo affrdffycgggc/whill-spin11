@@ -50,7 +50,7 @@
 </head>
 <body>
 
-<!-- عناصر الصوت (مخفية) -->
+<!-- عناصر الصوت -->
 <audio id="soundSpin" src="https://www.soundjay.com/misc/sounds/magic-chime-01.mp3" preload="auto"></audio>
 <audio id="soundWin" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
 <audio id="soundLose" src="https://www.soundjay.com/misc/sounds/fail-buzzer-01.mp3" preload="auto"></audio>
@@ -119,7 +119,7 @@
     // ===================== الإعدادات =====================
     const CONFIG = {
         pricePerSpin: 2000,
-        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // تأكد من تحديث الرابط
+        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // غيّر هذا الرابط إذا تغير Ngrok
     };
 
     // ===================== الجوائز =====================
@@ -130,16 +130,16 @@
         { label: 'سامسونج', sub: 'S24 Ultra', color: '#7c3aed', type: 'phone', icon: '📱' },
         { label: '500,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
         { label: 'ساعة ذكية', sub: 'Apple Watch', color: '#0891b2', type: 'gadget', icon: '⌚' },
-        { label: 'لفة مجانية', sub: 'بدون خصم', color: '#06b6d4', type: 'free_spin', icon: '🔄' },
+        { label: 'لفة مجانية', sub: 'بدون خصم', color: '#06b6d4', type: 'free_spin', icon: '🔄' }, // Index 6
         { label: 'AirPods', sub: 'Pro 2', color: '#6366f1', type: 'gadget', icon: '🎧' },
         { label: '100,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
-        { label: 'حظ أوفر', sub: '', color: '#4b5563', type: 'lose', icon: '💔' },
+        { label: 'حظ أوفر', sub: '', color: '#4b5563', type: 'lose', icon: '💔' }, // Index 9
     ];
 
     // ===================== الحالة =====================
     let state = {
         balance: 0,
-        jackpot: 15000000, // القيمة الابتدائية
+        jackpot: 15000000,
         isSpinning: false,
         currentRotation: 0,
         userId: null,
@@ -203,7 +203,6 @@
             if (data.success) {
                 state.balance = data.balance;
                 state.hasFreeSpin = data.has_free_spin;
-                // تحديث الجاكبوت من السيرفر
                 if (data.jackpot) state.jackpot = data.jackpot;
                 updateUI();
             } else {
@@ -301,7 +300,6 @@
         btn.disabled = true;
         btn.innerHTML = 'انتظر<br>...';
         
-        // تشغيل صوت البداية
         playSound('soundSpin');
 
         try {
@@ -320,10 +318,10 @@
             if (data.success) {
                 state.balance = data.new_balance;
                 state.hasFreeSpin = data.has_free_spin;
-                // تحديث الجاكبوت بعد الدوران
                 if (data.jackpot) state.jackpot = data.jackpot;
                 
-                animateWheel(data.prize_index, PRIZES[data.prize_index]);
+                // نمرر الفهرس القادم من البوت (سيكون 6 أو 9 فقط)
+                animateWheel(data.prize_index);
             } else {
                 showToast(data.message || 'حدث خطأ');
                 resetSpinButton();
@@ -336,7 +334,8 @@
         }
     }
 
-    function animateWheel(prizeIndex, prize) {
+    function animateWheel(prizeIndex) {
+        // حساب زاوية الوقوف بناءً على الفهرس الحقيقي
         const prizeAngleDeg = (prizeIndex * (360 / PRIZES.length)) + (360 / PRIZES.length / 2);
         const spins = 5 + Math.floor(Math.random() * 3);
         const stopAtDeg = 360 - prizeAngleDeg;
@@ -349,20 +348,19 @@
         canvas.style.transform = `rotate(${state.currentRotation}rad)`;
 
         setTimeout(() => {
-            handleResult(prize, prizeIndex);
+            // نمرر الجائزة الحقيقية التي وقف عليها السهم
+            handleResult(PRIZES[prizeIndex]);
             resetSpinButton();
         }, 6200);
     }
 
-    function handleResult(prize, index) {
+    function handleResult(prize) {
+        // الآن prize هو الكائن الحقيقي (إما لفة مجانية أو حظ أوفر)
         if (prize.type === 'free_spin') {
-            playSound('soundWin'); // صوت الفوز للفة مجانية
+            playSound('soundWin');
             showResult(prize, true, false, true);
-        } else if (prize.type !== 'lose') {
-            playSound('soundWin'); // صوت الفوز (لن يحدث حسب الكود الحالي)
-            showResult(prize, true, false);
         } else {
-            playSound('soundLose'); // صوت الخسارة
+            playSound('soundLose');
             showResult(prize, false, false);
         }
         updateUI();
