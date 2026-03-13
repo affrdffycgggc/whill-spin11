@@ -50,6 +50,11 @@
 </head>
 <body>
 
+<!-- عناصر الصوت (مخفية) -->
+<audio id="soundSpin" src="https://www.soundjay.com/misc/sounds/magic-chime-01.mp3" preload="auto"></audio>
+<audio id="soundWin" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+<audio id="soundLose" src="https://www.soundjay.com/misc/sounds/fail-buzzer-01.mp3" preload="auto"></audio>
+
 <div class="bg-layer"></div>
 
 <main class="relative z-10 max-w-md mx-auto px-4 py-6">
@@ -114,10 +119,10 @@
     // ===================== الإعدادات =====================
     const CONFIG = {
         pricePerSpin: 2000,
-        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // تأكد من تحديث هذا الرابط إذا تغير
+        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // تأكد من تحديث الرابط
     };
 
-    // ===================== الجوائز (مطابقة تماماً للكود بايثون) =====================
+    // ===================== الجوائز =====================
     const PRIZES = [
         { label: '5,000,000', sub: 'ل.س', color: '#dc2626', type: 'jackpot', icon: '💎' },
         { label: 'آيفون 15', sub: 'Pro Max', color: '#1d4ed8', type: 'phone', icon: '📱' },
@@ -134,7 +139,7 @@
     // ===================== الحالة =====================
     let state = {
         balance: 0,
-        jackpot: 15000000,
+        jackpot: 15000000, // القيمة الابتدائية
         isSpinning: false,
         currentRotation: 0,
         userId: null,
@@ -143,6 +148,17 @@
     };
 
     let tgApp = null;
+
+    // ===================== أدوات الصوت =====================
+    function playSound(id) {
+        try {
+            const sound = document.getElementById(id);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Audio blocked:", e));
+            }
+        } catch (e) {}
+    }
 
     // ===================== تهيئة تيليجرام =====================
     async function initTelegram() {
@@ -156,9 +172,7 @@
                 const u = tgApp.initDataUnsafe.user;
                 state.userId = u.id;
                 state.userName = u.first_name || 'مستخدم';
-                
                 await fetchUserData(); 
-                
             } else {
                 state.userId = 12345678;
                 state.balance = 5000;
@@ -170,7 +184,7 @@
         }
     }
 
-    // ===================== دالة جلب الرصيد =====================
+    // ===================== دالة جلب الرصيد والجاكبوت =====================
     async function fetchUserData() {
         try {
             const url = CONFIG.baseUrl + '/api/get_me';
@@ -189,6 +203,8 @@
             if (data.success) {
                 state.balance = data.balance;
                 state.hasFreeSpin = data.has_free_spin;
+                // تحديث الجاكبوت من السيرفر
+                if (data.jackpot) state.jackpot = data.jackpot;
                 updateUI();
             } else {
                 document.getElementById('displayBalance').textContent = "سجل في البوت";
@@ -284,6 +300,9 @@
         const btn = document.getElementById('btnSpin');
         btn.disabled = true;
         btn.innerHTML = 'انتظر<br>...';
+        
+        // تشغيل صوت البداية
+        playSound('soundSpin');
 
         try {
             const response = await fetch(CONFIG.baseUrl + '/api/spin', {
@@ -301,6 +320,9 @@
             if (data.success) {
                 state.balance = data.new_balance;
                 state.hasFreeSpin = data.has_free_spin;
+                // تحديث الجاكبوت بعد الدوران
+                if (data.jackpot) state.jackpot = data.jackpot;
+                
                 animateWheel(data.prize_index, PRIZES[data.prize_index]);
             } else {
                 showToast(data.message || 'حدث خطأ');
@@ -334,10 +356,13 @@
 
     function handleResult(prize, index) {
         if (prize.type === 'free_spin') {
+            playSound('soundWin'); // صوت الفوز للفة مجانية
             showResult(prize, true, false, true);
         } else if (prize.type !== 'lose') {
+            playSound('soundWin'); // صوت الفوز (لن يحدث حسب الكود الحالي)
             showResult(prize, true, false);
         } else {
+            playSound('soundLose'); // صوت الخسارة
             showResult(prize, false, false);
         }
         updateUI();
@@ -353,7 +378,7 @@
         } else {
             document.getElementById('resTitle').textContent = isWin ? (isJackpot ? 'جاكبوت!' : 'مبروك!') : 'حظ أوفر';
             document.getElementById('resPrize').textContent = isWin ? `${prize.label} ${prize.sub}` : 'حاول مرة أخرى';
-            document.getElementById('resMsg').textContent = isWin ? 'تم إضافة الجائزة لرصيدك' : 'الجاكبوت يكبر!';
+            document.getElementById('resMsg').textContent = isWin ? 'تم إضافة الجائزة لرصيدك' : 'الجاكبوت يكبر! حاول مجدداً';
         }
 
         document.getElementById('modalResult').classList.add('show');
