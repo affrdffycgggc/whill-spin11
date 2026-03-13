@@ -112,15 +112,9 @@
 
 <script>
     // ===================== الإعدادات =====================
-       const CONFIG = {
-           
-    pricePerSpin: 2000,
-           
-    baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // الصق الرابط هنا
-};
-            
-        
-    
+    const CONFIG = {
+        pricePerSpin: 2000,
+        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // تأكد من تحديث هذا الرابط إذا تغير
     };
 
     // ===================== الجوائز (مطابقة تماماً للكود بايثون) =====================
@@ -163,13 +157,11 @@
                 state.userId = u.id;
                 state.userName = u.first_name || 'مستخدم';
                 
-                // --- تغيير هام: جلب الرصيد الحقيقي من السيرفر ---
                 await fetchUserData(); 
                 
             } else {
-                // وضع المعاينة (للتجربة على الكمبيوتر بدون بوت)
                 state.userId = 12345678;
-                state.balance = 5000; // رصيد تجريبي للمعاينة
+                state.balance = 5000;
                 state.userName = "وضع المعاينة";
                 updateUI();
             }
@@ -178,10 +170,9 @@
         }
     }
 
-    // ===================== دالة جلب الرصيد (جديدة) =====================
+    // ===================== دالة جلب الرصيد =====================
     async function fetchUserData() {
         try {
-            // التوجه إلى الرابط الصحيح: /api/get_me
             const url = CONFIG.baseUrl + '/api/get_me';
             
             const response = await fetch(url, {
@@ -198,14 +189,13 @@
             if (data.success) {
                 state.balance = data.balance;
                 state.hasFreeSpin = data.has_free_spin;
-                updateUI(); // تحديث الشاشة
+                updateUI();
             } else {
-                console.log("User not found in DB");
                 document.getElementById('displayBalance').textContent = "سجل في البوت";
             }
         } catch (e) {
             console.error("Error fetching balance", e);
-            showToast("فشل الاتصال بالسيرفر (تأكد من رابط Ngrok)");
+            showToast("فشل الاتصال بالسيرفر");
         }
     }
 
@@ -238,13 +228,12 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // كتابة النص
             ctx.save();
             ctx.translate(cx, cy);
             const textAngle = startAngle + sliceAngle / 2;
             ctx.rotate(textAngle);
             ctx.translate(radius * 0.65, 0);
-            ctx.rotate(Math.PI / 2); // تصحيح النص ليكون مقروءاً
+            ctx.rotate(Math.PI / 2);
 
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
@@ -261,7 +250,6 @@
             ctx.restore();
         });
 
-        // المركز
         ctx.beginPath();
         ctx.arc(cx, cy, 45, 0, 2 * Math.PI);
         const centerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 45);
@@ -287,7 +275,6 @@
     async function spin() {
         if (state.isSpinning) return;
 
-        // فحص محلي سريع
         if (!state.hasFreeSpin && state.balance < CONFIG.pricePerSpin) {
             showToast('رصيد غير كافي، قم بالإيداع أولاً');
             return;
@@ -296,11 +283,9 @@
         state.isSpinning = true;
         const btn = document.getElementById('btnSpin');
         btn.disabled = true;
-        btn.classList.add('loading');
         btn.innerHTML = 'انتظر<br>...';
 
         try {
-            // التوجه إلى الرابط الصحيح: /api/spin
             const response = await fetch(CONFIG.baseUrl + '/api/spin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -314,20 +299,17 @@
             const data = await response.json();
 
             if (data.success) {
-                // تحديث الحالة المحلية ببيانات السيرفر
                 state.balance = data.new_balance;
                 state.hasFreeSpin = data.has_free_spin;
-                
-                // تشغيل حركة العجلة
                 animateWheel(data.prize_index, PRIZES[data.prize_index]);
             } else {
-                showToast(data.message || 'حدث خطأ في السيرفر');
+                showToast(data.message || 'حدث خطأ');
                 resetSpinButton();
             }
 
         } catch (e) {
             console.error(e);
-            showToast('فشل الاتصال بالسيرفر. تأكد من رابط Ngrok');
+            showToast('فشل الاتصال بالسيرفر');
             resetSpinButton();
         }
     }
@@ -384,7 +366,6 @@
         state.isSpinning = false;
         const btn = document.getElementById('btnSpin');
         btn.disabled = false;
-        btn.classList.remove('loading');
         btn.innerHTML = 'ابقِ<br>دور';
         updateUI();
     }
@@ -441,4 +422,3 @@
 </script>
 </body>
 </html>
-
