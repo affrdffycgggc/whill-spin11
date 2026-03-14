@@ -3,435 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>عجلة الحظ - IChancey</title>
+    <title>عجلة الحظ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0f0f1a; --fg: #ffffff; --accent: #fbbf24; --accent-dark: #b45309;
-            --card: #1a1a2e; --border: #2d2d44; --success: #10b981; --danger: #ef4444;
-            --free-spin: #06b6d4;
-        }
-        * { font-family: 'Tajawal', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--fg); overflow-x: hidden; }
-        .bg-layer { position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+        :root { --bg: #0f0f1a; --fg: #ffffff; --accent: #fbbf24; --card: #1a1a2e; --border: #2d2d44; --success: #10b981; --danger: #ef4444; --free-spin: #06b6d4; }
+        * { font-family: 'Tajawal', sans-serif; box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg); overflow: hidden; }
+        .bg-layer { position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.1) 0%, transparent 60%); pointer-events: none; }
         
-        .jackpot-card { background: linear-gradient(180deg, #1f1f35 0%, #16162a 100%); border: 1px solid var(--accent); border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(251, 191, 36, 0.15); }
-        .jackpot-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: shine 4s infinite; }
-        @keyframes shine { 0% { left: -100%; } 50%, 100% { left: 100%; } }
-        .jackpot-value { font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 900; background: linear-gradient(to bottom, #fcd34d, #f59e0b, #b45309); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .jackpot-card { background: linear-gradient(180deg, #1f1f35 0%, #16162a 100%); border: 1px solid var(--accent); border-radius: 16px; box-shadow: 0 0 30px rgba(251, 191, 36, 0.1); }
+        .jackpot-value { font-size: 2rem; font-weight: 900; background: linear-gradient(to bottom, #fcd34d, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .wheel-stage { position: relative; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .wheel-glow { position: absolute; width: 320px; height: 320px; background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%); filter: blur(25px); animation: pulse 3s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+        .wheel-stage { position: relative; width: 320px; height: 320px; margin: 20px auto; }
+        .wheel-glow { position: absolute; inset: -20px; background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%); filter: blur(20px); animation: pulse 4s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-        .pointer-box { position: absolute; top: 0px; left: 50%; transform: translateX(-50%); z-index: 50; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
-        .spin-btn-main { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(145deg, #fbbf24, #d97706); border: 3px solid #92400e; color: #1a1a2e; font-weight: 900; font-size: 1rem; cursor: pointer; z-index: 40; box-shadow: 0 8px 25px rgba(0,0,0,0.4); transition: all 0.2s; }
-        .spin-btn-main:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.95); }
-        .spin-btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
-        .spin-btn-main.free-spin-active { background: linear-gradient(145deg, #06b6d4, #0891b2); border-color: #0e7490; animation: pulse-btn 2s infinite; }
-        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); } }
+        /* مؤشر السهم - تم تعديله ليكون أدق */
+        .pointer-box { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 50; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); }
+        .pointer-box svg { width: 30px; height: 40px; }
+        
+        .spin-btn-main { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(145deg, #fbbf24, #d97706); border: 3px solid #fff; color: #000; font-weight: 900; font-size: 0.9rem; cursor: pointer; z-index: 40; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .spin-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+        .spin-btn-main.free-spin-active { background: linear-gradient(145deg, #06b6d4, #0891b2); border-color: #fff; }
 
         .user-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
         .balance-num { font-size: 1.5rem; font-weight: 900; color: var(--success); }
         .free-spin-badge { background: var(--free-spin); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; animation: bounce 1s infinite; display: inline-block; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
-        .result-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .result-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: 0.3s; }
         .result-modal.show { opacity: 1; visibility: visible; }
-        .result-box { background: var(--card); border: 2px solid var(--accent); border-radius: 24px; padding: 2rem; text-align: center; max-width: 320px; transform: scale(0.8); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .result-box { background: var(--card); border: 2px solid var(--accent); border-radius: 24px; padding: 2rem; text-align: center; max-width: 320px; transform: scale(0.8); transition: 0.3s; }
         .result-modal.show .result-box { transform: scale(1); }
-        
-        .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 150; }
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1f1f35; border: 1px solid var(--danger); padding: 12px 24px; border-radius: 12px; font-weight: bold; z-index: 300; opacity: 0; transition: 0.3s; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-<!-- عناصر الصوت -->
-<audio id="soundSpin" src="https://www.soundjay.com/misc/sounds/magic-chime-01.mp3" preload="auto"></audio>
-<audio id="soundWin" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
-<audio id="soundLose" src="https://www.soundjay.com/misc/sounds/fail-buzzer-01.mp3" preload="auto"></audio>
-
 <div class="bg-layer"></div>
 
 <main class="relative z-10 max-w-md mx-auto px-4 py-6">
-    
-    <!-- الجاكبوت -->
     <section class="jackpot-card p-4 mb-6 text-center">
         <div class="text-xs text-gray-400 uppercase tracking-wider">Jackpot</div>
         <div class="jackpot-value my-1" id="displayJackpot">0</div>
-        <div class="text-xs text-gray-500">ليرة سورية</div>
     </section>
 
-    <!-- معلومات المستخدم -->
     <section class="user-panel p-4 mb-6">
         <div class="flex justify-between items-center">
             <div>
                 <div class="text-gray-400 text-xs">رصيدك</div>
-                <div class="balance-num" id="displayBalance">جاري التحميل...</div>
-                <div id="freeSpinStatus" class="hidden mt-1">
-                    <span class="free-spin-badge">لديك لفة مجانية!</span>
-                </div>
+                <div class="balance-num" id="displayBalance">...</div>
+                <div id="freeSpinStatus" class="hidden mt-1"><span class="free-spin-badge">لفة مجانية!</span></div>
             </div>
-            <a href="https://t.me/ichancey_cash_bot?start=deposit" class="px-4 py-2 rounded-lg text-sm font-bold transition-all" style="background: var(--success); color: white;">
-                إيداع
-            </a>
-        </div>
-        <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-700 text-sm">
-            <span class="text-gray-400">سعر اللفة:</span>
-            <span style="color: var(--accent); font-weight: bold;">2,000 ل.س</span>
+            <a href="https://t.me/ichancey_cash_bot?start=deposit" class="px-4 py-2 rounded-lg text-sm font-bold" style="background: var(--success); color: white;">إيداع</a>
         </div>
     </section>
 
-    <!-- العجلة -->
     <section class="wheel-stage mb-8">
         <div class="wheel-glow"></div>
         <div class="pointer-box">
-            <svg width="40" height="40" viewBox="0 0 40 40">
-                <path d="M20 40 L0 0 L40 0 Z" fill="url(#pGrad)" stroke="#92400e" stroke-width="2"/>
-                <defs><linearGradient id="pGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#b45309"/><stop offset="100%" stop-color="#fcd34d"/></linearGradient></defs>
+            <!-- سهم مثلت اسود حاد -->
+            <svg viewBox="0 0 30 40">
+                <path d="M15 40 L0 0 L30 0 Z" fill="#000" stroke="#fbbf24" stroke-width="2"/>
             </svg>
         </div>
         <canvas id="wheelCanvas" width="320" height="320"></canvas>
-        <button class="spin-btn-main" id="btnSpin">ابقِ<br>دور</button>
+        <button class="spin-btn-main" id="btnSpin">دور<br>الآن</button>
     </section>
-
 </main>
 
-<!-- نافذة النتيجة -->
 <div class="result-modal" id="modalResult">
     <div class="result-box">
         <div class="text-5xl mb-3" id="resIcon">🎁</div>
-        <h2 class="text-xl font-bold mb-2" style="color:var(--accent);" id="resTitle">تهانينا!</h2>
+        <h2 class="text-xl font-bold mb-2" style="color:var(--accent);" id="resTitle">النتيجة</h2>
         <p class="text-2xl font-black mb-4" id="resPrize">الجائزة</p>
-        <p class="text-sm text-gray-400 mb-4" id="resMsg"></p>
         <button onclick="hideModal()" class="w-full py-3 rounded-xl font-bold" style="background:var(--accent); color:#000;">حسناً</button>
     </div>
 </div>
-
-<div class="confetti-layer" id="confettiBox"></div>
 <div class="toast" id="toastBox"></div>
 
 <script>
     // ===================== الإعدادات =====================
     const CONFIG = {
         pricePerSpin: 2000,
-        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' // تأكد من تحديث الرابط
+        // هام: غيّر هذا الرابط للرابط الجديد من Ngrok
+        baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' 
     };
 
-    // ===================== الجوائز (مالية فقط) =====================
-    // الفهرس 6 = لفة مجانية (هدف)
-    // الفهرس 9 = حظ أوفر (هدف)
+    // ===================== الجوائز (6=لفة مجانية, 9=حظ أوفر) =====================
     const PRIZES = [
-        { label: '5,000,000', sub: 'ل.س', color: '#dc2626', type: 'cash', icon: '💎' },      // 0
-        { label: '2,000,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💰' },      // 1
-        { label: '1,000,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💰' },      // 2
-        { label: '800,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },        // 3
-        { label: '500,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },        // 4
-        { label: '300,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },        // 5
-        { label: 'لفة مجانية', sub: 'هدية', color: '#06b6d4', type: 'free_spin', icon: '🔄' }, // 6 (سهم يقف هنا)
-        { label: '200,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },        // 7
-        { label: '100,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },        // 8
-        { label: 'حظ أوفر', sub: 'حاول مجدداً', color: '#4b5563', type: 'lose', icon: '💔' },  // 9 (سهم يقف هنا)
+        { label: '5,000,000', sub: 'ل.س', color: '#dc2626', type: 'cash', icon: '💎' },
+        { label: '2,000,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💰' },
+        { label: '1,000,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💰' },
+        { label: '800,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
+        { label: '500,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
+        { label: '300,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
+        { label: 'لفة مجانية', sub: 'هدية', color: '#06b6d4', type: 'free_spin', icon: '🔄' },
+        { label: '200,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
+        { label: '100,000', sub: 'ل.س', color: '#16a34a', type: 'cash', icon: '💵' },
+        { label: 'حظ أوفر', sub: 'خسارة', color: '#4b5563', type: 'lose', icon: '💔' },
     ];
 
-    // ===================== الحالة =====================
-    let state = {
-        balance: 0,
-        jackpot: 15000000,
-        isSpinning: false,
-        currentRotation: 0,
-        userId: null,
-        userName: 'زائر',
-        hasFreeSpin: false
-    };
-
+    let state = { balance: 0, jackpot: 15000000, isSpinning: false, currentRotation: 0, userId: null, hasFreeSpin: false };
     let tgApp = null;
-
-    function playSound(id) {
-        try {
-            const sound = document.getElementById(id);
-            if (sound) {
-                sound.currentTime = 0;
-                sound.play().catch(e => console.log("Audio blocked", e));
-            }
-        } catch (e) {}
-    }
 
     async function initTelegram() {
         try {
-            tgApp = window.Telegram.WebApp;
-            tgApp.ready();
-            tgApp.expand();
-            document.body.style.backgroundColor = tgApp.backgroundColor || '#0f0f1a';
-
+            tgApp = window.Telegram.WebApp; tgApp.ready(); tgApp.expand();
             if (tgApp.initDataUnsafe && tgApp.initDataUnsafe.user) {
-                const u = tgApp.initDataUnsafe.user;
-                state.userId = u.id;
-                state.userName = u.first_name || 'مستخدم';
+                state.userId = tgApp.initDataUnsafe.user.id;
                 await fetchUserData(); 
-            } else {
-                state.userId = 12345678;
-                state.balance = 5000;
-                state.userName = "وضع المعاينة";
-                updateUI();
-            }
-        } catch (e) {
-            console.error('Telegram Init Error', e);
-        }
+            } else { state.userId = 123456; state.balance = 5000; updateUI(); }
+        } catch (e) { console.error(e); }
     }
 
     async function fetchUserData() {
         try {
-            const url = CONFIG.baseUrl + '/api/get_me';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: state.userId,
-                    init_data: window.Telegram.WebApp.initData
-                })
+            const res = await fetch(CONFIG.baseUrl + '/api/get_me', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: state.userId })
             });
-            const data = await response.json();
-            if (data.success) {
-                state.balance = data.balance;
-                state.hasFreeSpin = data.has_free_spin;
-                if (data.jackpot) state.jackpot = data.jackpot;
-                updateUI();
-            } else {
-                document.getElementById('displayBalance').textContent = "سجل في البوت";
-            }
-        } catch (e) {
-            console.error("Error fetching balance", e);
-            showToast("فشل الاتصال");
-        }
+            const data = await res.json();
+            if (data.success) { state.balance = data.balance; state.hasFreeSpin = data.has_free_spin; state.jackpot = data.jackpot; updateUI(); }
+        } catch (e) { showToast("فشل الاتصال بالسيرفر"); }
     }
 
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const radius = Math.min(cx, cy) - 5;
+    const canvas = document.getElementById('wheelCanvas'); const ctx = canvas.getContext('2d');
+    const cx = canvas.width / 2; const cy = canvas.height / 2; const radius = 150;
     const sliceAngle = (2 * Math.PI) / PRIZES.length;
 
     function drawWheel() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        PRIZES.forEach((prize, i) => {
+        PRIZES.forEach((p, i) => {
+            // نبدأ الرسم من الأعلى (-90 درجة)
             const startAngle = i * sliceAngle - Math.PI / 2;
             const endAngle = startAngle + sliceAngle;
 
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, radius, startAngle, endAngle);
-            ctx.closePath();
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, radius, startAngle, endAngle); ctx.closePath();
+            ctx.fillStyle = p.color; ctx.fill();
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.stroke();
 
-            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-            grad.addColorStop(0, lighten(prize.color, 40));
-            grad.addColorStop(1, prize.color);
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
+            // النص
             ctx.save();
             ctx.translate(cx, cy);
-            const textAngle = startAngle + sliceAngle / 2;
-            ctx.rotate(textAngle);
-            ctx.translate(radius * 0.65, 0);
-            ctx.rotate(Math.PI / 2);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = 'rgba(0,0,0,0.7)';
-            ctx.shadowBlur = 4;
-
-            ctx.font = 'bold 14px Tajawal';
-            ctx.fillText(prize.label, 0, -8);
-            if (prize.sub) {
-                ctx.font = '11px Tajawal';
-                ctx.fillText(prize.sub, 0, 8);
-            }
+            ctx.rotate(startAngle + sliceAngle / 2); // نصف الزاوية
+            ctx.translate(radius * 0.7, 0);
+            ctx.rotate(Math.PI / 2); // جعل النص أفقي
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 14px Tajawal'; ctx.textAlign = 'center'; ctx.shadowColor='#000'; ctx.shadowBlur=4;
+            ctx.fillText(p.label, 0, -6);
+            ctx.font = '10px Tajawal'; ctx.fillText(p.sub, 0, 8);
             ctx.restore();
         });
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, 45, 0, 2 * Math.PI);
-        const centerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 45);
-        centerGrad.addColorStop(0, '#2a2a4a');
-        centerGrad.addColorStop(1, '#1a1a2e');
-        ctx.fillStyle = centerGrad;
-        ctx.fill();
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-    }
-
-    function lighten(hex, percent) {
-        const num = parseInt(hex.replace('#', ''), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = Math.min(255, (num >> 16) + amt);
-        const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-        const B = Math.min(255, (num & 0x0000FF) + amt);
-        return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+        // الدائرة الوسطية
+        ctx.beginPath(); ctx.arc(cx, cy, 35, 0, 2 * Math.PI); ctx.fillStyle='#1a1a2e'; ctx.fill(); ctx.strokeStyle='#fbbf24'; ctx.lineWidth=3; ctx.stroke();
     }
 
     async function spin() {
         if (state.isSpinning) return;
-
-        if (!state.hasFreeSpin && state.balance < CONFIG.pricePerSpin) {
-            showToast('رصيد غير كافي، قم بالإيداع أولاً');
-            return;
-        }
-
-        state.isSpinning = true;
-        const btn = document.getElementById('btnSpin');
-        btn.disabled = true;
-        btn.innerHTML = 'انتظر<br>...';
+        if (!state.hasFreeSpin && state.balance < CONFIG.pricePerSpin) { showToast('رصيد غير كافي'); return; }
+        state.isSpinning = true; document.getElementById('btnSpin').disabled = true; document.getElementById('btnSpin').innerHTML='...';
         
-        playSound('soundSpin');
-
         try {
-            const response = await fetch(CONFIG.baseUrl + '/api/spin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: state.userId,
-                    init_data: window.Telegram.WebApp.initData,
-                    is_free_spin: state.hasFreeSpin
-                })
+            const res = await fetch(CONFIG.baseUrl + '/api/spin', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: state.userId, is_free_spin: state.hasFreeSpin })
             });
-
-            const data = await response.json();
-
+            const data = await res.json();
             if (data.success) {
-                state.balance = data.new_balance;
-                state.hasFreeSpin = data.has_free_spin;
-                if (data.jackpot) state.jackpot = data.jackpot;
-                
-                // البوت يرسل فهرس 6 أو 9 فقط
+                state.balance = data.new_balance; state.hasFreeSpin = data.has_free_spin; state.jackpot = data.jackpot;
+                // البوت يرسل رقم 6 أو 9 فقط
                 animateWheel(data.prize_index);
-            } else {
-                showToast(data.message || 'حدث خطأ');
-                resetSpinButton();
-            }
-
-        } catch (e) {
-            console.error(e);
-            showToast('فشل الاتصال');
-            resetSpinButton();
-        }
+            } else { showToast(data.message); state.isSpinning = false; updateUI(); }
+        } catch(e) { showToast("خطأ اتصال"); state.isSpinning = false; updateUI(); }
     }
 
-    function animateWheel(prizeIndex) {
-        // حساب الزاوية للفهرس القادم (6 أو 9)
-        const prizeAngleDeg = (prizeIndex * (360 / PRIZES.length)) + (360 / PRIZES.length / 2);
+    function animateWheel(targetIndex) {
+        // حساب الزاوية الهدف
+        // البداية من الأعلى (270 درجة أو -90). الشرائح مرسومة بالترتيب.
+        // الشريحة i تبدأ عند (i * 36 - 90).
+        // مركز الشريحة i عند (i * 36 - 90 + 18).
+        
+        const targetAngleDeg = (targetIndex * 36) + 18; // الموقع على الدائرة (0 هو الأعلى بسبب رسم Canvas)
+        // نحتاج لتدوير العجلة بحيث يأتي مركز الشريحة عند المؤشر (الأعلى، أي 0 درجة في الحركة)
+        // المعادلة القياسية: 360 - (زاوية الهدف)
+        const stopAtDeg = 360 - targetAngleDeg;
+        
         const spins = 5 + Math.floor(Math.random() * 3);
-        const stopAtDeg = 360 - prizeAngleDeg;
         const totalRotationDeg = (spins * 360) + stopAtDeg;
-        const totalRotationRad = totalRotationDeg * (Math.PI / 180);
-
-        state.currentRotation += totalRotationRad;
-
-        canvas.style.transition = 'transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-        canvas.style.transform = `rotate(${state.currentRotation}rad)`;
+        
+        // تحديث الـ CSS
+        canvas.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.3, 1)';
+        canvas.style.transform = `rotate(${totalRotationDeg}deg)`;
+        
+        // تحديث الحالة الداخلية
+        state.currentRotation = totalRotationDeg;
 
         setTimeout(() => {
-            handleResult(PRIZES[prizeIndex]);
-            resetSpinButton();
-        }, 6200);
+            handleResult(PRIZES[targetIndex]);
+            state.isSpinning = false; updateUI();
+        }, 5200);
     }
 
     function handleResult(prize) {
-        if (prize.type === 'free_spin') {
-            playSound('soundWin');
-            showResult(prize, true, false, true);
-        } else {
-            playSound('soundLose');
-            showResult(prize, false, false);
-        }
-        updateUI();
-    }
-
-    function showResult(prize, isWin, isJackpot, isFreeSpinWin = false) {
         document.getElementById('resIcon').textContent = prize.icon;
-        
-        if (isFreeSpinWin) {
-            document.getElementById('resTitle').textContent = 'رائع!';
-            document.getElementById('resPrize').textContent = 'لفة مجانية!';
-            document.getElementById('resMsg').textContent = 'لقد ربحت لفة مجانية! ادر العجلة مجدداً.';
-        } else {
-            document.getElementById('resTitle').textContent = isWin ? (isJackpot ? 'جاكبوت!' : 'مبروك!') : 'حظ أوفر';
-            document.getElementById('resPrize').textContent = isWin ? `${prize.label} ${prize.sub}` : 'حاول مرة أخرى';
-            document.getElementById('resMsg').textContent = isWin ? 'تم إضافة الجائزة لرصيدك' : 'الجاكبوت يكبر! حاول مجدداً';
-        }
-
+        document.getElementById('resTitle').textContent = prize.type === 'lose' ? 'حظ أوفر' : 'مبروك!';
+        document.getElementById('resPrize').textContent = prize.label + ' ' + prize.sub;
         document.getElementById('modalResult').classList.add('show');
-        if (isWin || isFreeSpinWin) createConfetti();
     }
 
     function hideModal() { document.getElementById('modalResult').classList.remove('show'); }
 
-    function resetSpinButton() {
-        state.isSpinning = false;
-        const btn = document.getElementById('btnSpin');
-        btn.disabled = false;
-        btn.innerHTML = 'ابقِ<br>دور';
-        updateUI();
-    }
-
     function updateUI() {
         document.getElementById('displayBalance').textContent = state.balance.toLocaleString();
         document.getElementById('displayJackpot').textContent = state.jackpot.toLocaleString();
-
         const btn = document.getElementById('btnSpin');
-        const statusDiv = document.getElementById('freeSpinStatus');
-        if (state.hasFreeSpin) {
-            btn.classList.add('free-spin-active');
-            statusDiv.classList.remove('hidden');
-        } else {
-            btn.classList.remove('free-spin-active');
-            statusDiv.classList.add('hidden');
-        }
+        btn.disabled = state.isSpinning;
+        btn.innerHTML = state.isSpinning ? '...' : (state.hasFreeSpin ? 'مجاني<br>دور' : 'دور<br>الآن');
+        btn.classList.toggle('free-spin-active', state.hasFreeSpin);
+        document.getElementById('freeSpinStatus').classList.toggle('hidden', !state.hasFreeSpin);
     }
 
-    function showToast(msg) {
-        const box = document.getElementById('toastBox');
-        box.textContent = msg;
-        box.classList.add('show');
-        setTimeout(() => box.classList.remove('show'), 3000);
-    }
+    function showToast(msg) { const b = document.getElementById('toastBox'); b.textContent = msg; b.classList.add('show'); setTimeout(() => b.classList.remove('show'), 3000); }
 
-    function createConfetti() {
-        const box = document.getElementById('confettiBox');
-        const colors = ['#fbbf24', '#ef4444', '#22c55e', '#3b82f6', '#06b6d4'];
-        for (let i = 0; i < 50; i++) {
-            const p = document.createElement('div');
-            p.className = 'confetti-particle';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.width = Math.random() * 10 + 5 + 'px';
-            p.style.height = p.style.width;
-            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            p.style.animationDelay = Math.random() * 0.5 + 's';
-            p.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-            box.appendChild(p);
-        }
-        setTimeout(() => box.innerHTML = '', 4000);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        initTelegram();
-        drawWheel();
-        document.getElementById('btnSpin').addEventListener('click', spin);
-        document.getElementById('modalResult').addEventListener('click', (e) => {
-            if (e.target.id === 'modalResult') hideModal();
-        });
-    });
+    document.addEventListener('DOMContentLoaded', () => { initTelegram(); drawWheel(); document.getElementById('btnSpin').addEventListener('click', spin); });
 </script>
 </body>
 </html>
