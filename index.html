@@ -174,8 +174,6 @@
             0%, 100% { opacity: 0.4; transform: scale(0.95); }
             50% { opacity: 1; transform: scale(1.05); }
         }
-
-        /* ===== السهم المصحح ===== */
         .pointer-box {
             position: absolute;
             top: -24px;
@@ -190,7 +188,6 @@
             50% { transform: translateX(-50%) scaleY(0.82); }
             100% { transform: translateX(-50%) scaleY(1); }
         }
-
         .spin-btn-main {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -387,7 +384,6 @@
         <div class="wheel-glow" id="wheelGlow"></div>
         <div class="led-ring" id="ledRing"></div>
 
-        <!-- السهم المصحح: أصغر ويماس حافة العجلة مباشرة -->
         <div class="pointer-box" id="pointerBox">
             <svg viewBox="0 0 28 40" width="28" height="40">
                 <defs>
@@ -426,27 +422,28 @@
 <script>
 // ===== إعدادات =====
 const CONFIG = {
-    pricePerSpin: 2000,
+    pricePerSpin: 2500,
     baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev'
 };
 
+// ===== فئات الجوائز من 2,500 إلى 100,000 =====
 const PRIZES = [
-    { label: '5,000,000', sub: 'ل.س', color: '#b91c1c', colorEnd: '#dc2626', type: 'cash', icon: '💎' },
-    { label: '2,000,000', sub: 'ل.س', color: '#15803d', colorEnd: '#22c55e', type: 'cash', icon: '💰' },
-    { label: '1,000,000', sub: 'ل.س', color: '#166534', colorEnd: '#16a34a', type: 'cash', icon: '💰' },
-    { label: '800,000', sub: 'ل.س', color: '#14532d', colorEnd: '#15803d', type: 'cash', icon: '💵' },
-    { label: '500,000', sub: 'ل.س', color: '#065f46', colorEnd: '#059669', type: 'cash', icon: '💵' },
-    { label: '300,000', sub: 'ل.س', color: '#047857', colorEnd: '#10b981', type: 'cash', icon: '💵' },
+    { label: '100,000', sub: 'ل.س', color: '#b91c1c', colorEnd: '#ef4444', type: 'cash', icon: '💎' },
+    { label: '2,500',   sub: 'ل.س', color: '#1e3a5f', colorEnd: '#3b82f6', type: 'cash', icon: '🪙' },
+    { label: '50,000',  sub: 'ل.س', color: '#15803d', colorEnd: '#22c55e', type: 'cash', icon: '💰' },
+    { label: '5,000',   sub: 'ل.س', color: '#155e75', colorEnd: '#0891b2', type: 'cash', icon: '🪙' },
+    { label: '30,000',  sub: 'ل.س', color: '#166534', colorEnd: '#16a34a', type: 'cash', icon: '💰' },
     { label: 'لفة مجانية', sub: 'هدية', color: '#0e7490', colorEnd: '#06b6d4', type: 'free_spin', icon: '🔄' },
-    { label: '200,000', sub: 'ل.س', color: '#155e75', colorEnd: '#0891b2', type: 'cash', icon: '💵' },
-    { label: '100,000', sub: 'ل.س', color: '#164e63', colorEnd: '#0e7490', type: 'cash', icon: '💵' },
+    { label: '15,000',  sub: 'ل.س', color: '#065f46', colorEnd: '#059669', type: 'cash', icon: '💵' },
+    { label: '10,000',  sub: 'ل.س', color: '#047857', colorEnd: '#10b981', type: 'cash', icon: '💵' },
+    { label: '25,000',  sub: 'ل.س', color: '#14532d', colorEnd: '#15803d', type: 'cash', icon: '💵' },
     { label: 'حظ أوفر', sub: 'خسارة', color: '#1f2937', colorEnd: '#374151', type: 'lose', icon: '💔' },
 ];
 
 // ===== ثوابت هندسية العجلة =====
 const NUM_SLICES = PRIZES.length;
-const SLICE_DEG = 360 / NUM_SLICES;       // 36°
-const HALF_SLICE_DEG = SLICE_DEG / 2;      // 18°
+const SLICE_DEG = 360 / NUM_SLICES;
+const HALF_SLICE_DEG = SLICE_DEG / 2;
 
 // ===== حالة التطبيق =====
 let state = {
@@ -883,41 +880,17 @@ async function spin() {
     }
 }
 
-// ===== تحريك العجلة (الإصدار المصحح) =====
+// ===== تحريك العجلة =====
 function animateWheel(targetIndex, prize, winAmount, oldBalance) {
-    /*
-     * كيف يعمل الحساب:
-     * - الشريحة i تُرسم على Canvas بدايةً من زاوية -90° (الساعة 12)
-     * - مركز الشريحة i عند: -90° + i×36° + 18°
-     * - السهم ثابت عند الأعلى (270° في نظام CSS = -90°)
-     * - نريد بعد الدوران بـ θ أن يكون مركز الشريحة عند السهم:
-     *   (-90 + i×36 + 18) + θ ≡ 270° (mod 360°)
-     *   θ = 270 - (-90 + i×36 + 18) = 342 - i×36
-     *
-     * - للحفاظ على صحة التراكم عبر دورات متعددة:
-     *   نحسب الزاوية المطلقة المطلوبة، ونقارنها بالزاوية المطلقة الحالية،
-     *   ونضيف الفرق + دورات كاملة
-     */
-
-    // 1. الزاوية المطلقة المطلوبة (0-360)
     const targetAbsolute = (((342 - targetIndex * SLICE_DEG) % 360) + 360) % 360;
-
-    // 2. الزاوية المطلقة الحالية (0-360)
     const currentAbsolute = (((state.currentRotation % 360) + 360) % 360);
-
-    // 3. الفرق مع الحفاظ على الدوران الأمامي (دائماً إيجابي، لا يتوقف عند نفس النقطة)
     let diff = targetAbsolute - currentAbsolute;
     if (diff <= 0) diff += 360;
-
-    // 4. إضافة دورات كاملة عشوائية
     const spins = 5 + Math.floor(Math.random() * 3);
     const addedRotation = (spins * 360) + diff;
-
-    // 5. ترايم الدوران
     const prevRotation = state.currentRotation;
     state.currentRotation += addedRotation;
 
-    // 6. تطبيق الدوران باستخدام double-rAF لضمان التطبيق الصحيح
     canvas.style.transition = 'none';
     canvas.style.transform = `rotate(${prevRotation}deg)`;
 
@@ -928,10 +901,8 @@ function animateWheel(targetIndex, prize, winAmount, oldBalance) {
         });
     });
 
-    // 7. بدء أصوات التكات
     startTickSound(SPIN_DURATION_MS);
 
-    // 8. عند انتهاء الدوران
     setTimeout(() => {
         stopTickSound();
         startLEDNormal();
