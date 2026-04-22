@@ -35,10 +35,7 @@
             overflow-y: auto;
         }
         .bg-canvas { position: fixed; inset: 0; z-index: 0; }
-        .bg-orb {
-            position: fixed; border-radius: 50%; filter: blur(80px);
-            pointer-events: none; z-index: 0;
-        }
+        .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
         .bg-orb-1 {
             width: 300px; height: 300px;
             background: radial-gradient(circle, rgba(251,191,36,0.12), transparent 70%);
@@ -57,288 +54,199 @@
             bottom: 30%; left: -30px;
             animation: orbFloat3 12s ease-in-out infinite;
         }
-        @keyframes orbFloat1 {
-            0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-            50% { transform: translateX(-50%) translateY(30px) scale(1.15); }
-        }
-        @keyframes orbFloat2 {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-40px) scale(1.1); }
-        }
-        @keyframes orbFloat3 {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(20px); }
-        }
+        @keyframes orbFloat1 { 0%,100%{transform:translateX(-50%) translateY(0) scale(1);}50%{transform:translateX(-50%) translateY(30px) scale(1.15);} }
+        @keyframes orbFloat2 { 0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-40px) scale(1.1);} }
+        @keyframes orbFloat3 { 0%,100%{transform:translateY(0);}50%{transform:translateY(20px);} }
         .jackpot-card {
             background: linear-gradient(135deg, rgba(30,30,55,0.9) 0%, rgba(15,15,30,0.95) 100%);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 20px;
-            backdrop-filter: blur(20px);
-            position: relative; overflow: hidden;
+            border: 1px solid rgba(251,191,36,0.3); border-radius: 20px;
+            backdrop-filter: blur(20px); position: relative; overflow: hidden;
         }
         .jackpot-card::before {
-            content: '';
-            position: absolute; inset: 0;
+            content: ''; position: absolute; inset: 0;
             background: linear-gradient(105deg, transparent 40%, rgba(251,191,36,0.05) 45%, rgba(251,191,36,0.1) 50%, rgba(251,191,36,0.05) 55%, transparent 60%);
             animation: shimmer 4s ease-in-out infinite;
         }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
+        @keyframes shimmer { 0%{transform:translateX(-100%);}100%{transform:translateX(100%);} }
         .jackpot-value {
             font-size: 2.2rem; font-weight: 900;
             background: linear-gradient(180deg, #fef3c7 0%, #fcd34d 30%, #f59e0b 70%, #d97706 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(251,191,36,0.3));
-            letter-spacing: 1px;
+            filter: drop-shadow(0 0 10px rgba(251,191,36,0.3)); letter-spacing: 1px;
         }
-        .jackpot-label {
-            font-size: 0.7rem; letter-spacing: 4px; text-transform: uppercase;
-            color: rgba(251,191,36,0.6); font-weight: 700;
-        }
-        .jackpot-crown {
-            font-size: 1.5rem; animation: crownBounce 2s ease-in-out infinite; display: inline-block;
-        }
-        @keyframes crownBounce {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-3px) rotate(-3deg); }
-            75% { transform: translateY(-3px) rotate(3deg); }
-        }
+        .jackpot-label { font-size: 0.7rem; letter-spacing: 4px; text-transform: uppercase; color: rgba(251,191,36,0.6); font-weight: 700; }
+        .jackpot-crown { font-size: 1.5rem; animation: crownBounce 2s ease-in-out infinite; display: inline-block; }
+        @keyframes crownBounce { 0%,100%{transform:translateY(0) rotate(0deg);}25%{transform:translateY(-3px) rotate(-3deg);}75%{transform:translateY(-3px) rotate(3deg);} }
         .user-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            backdrop-filter: blur(20px);
-            position: relative; overflow: hidden;
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            backdrop-filter: blur(20px); position: relative; overflow: hidden;
         }
         .user-panel::after {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
         }
-        .balance-num {
-            font-size: 1.8rem; font-weight: 900;
-            color: var(--success);
-            text-shadow: 0 0 20px rgba(16,185,129,0.3);
-        }
+        .balance-num { font-size: 1.8rem; font-weight: 900; color: var(--success); text-shadow: 0 0 20px rgba(16,185,129,0.3); }
         .deposit-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none; color: white; padding: 10px 24px; border-radius: 14px;
-            font-weight: 900; font-size: 0.85rem; cursor: pointer;
-            position: relative; overflow: hidden; transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(16,185,129,0.3); text-decoration: none;
-            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669); border: none; color: white;
+            padding: 10px 24px; border-radius: 14px; font-weight: 900; font-size: 0.85rem;
+            cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.3); text-decoration: none; display: inline-block;
         }
-        .deposit-btn::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
+        .deposit-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent); transition:0.5s; }
         .deposit-btn:hover::before { left: 100%; }
         .deposit-btn:active { transform: scale(0.95); }
         .free-spin-badge {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-            color: white; padding: 5px 14px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700;
-            animation: badgePulse 1.5s ease-in-out infinite;
-            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #06b6d4, #0891b2); color: white;
+            padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            animation: badgePulse 1.5s ease-in-out infinite; display: inline-flex; align-items: center; gap: 4px;
             box-shadow: 0 0 15px rgba(6,182,212,0.4);
         }
-        @keyframes badgePulse {
-            0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 15px rgba(6,182,212,0.4); }
-            50% { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 25px rgba(6,182,212,0.6); }
-        }
+        @keyframes badgePulse { 0%,100%{transform:translateY(0) scale(1);box-shadow:0 0 15px rgba(6,182,212,0.4);}50%{transform:translateY(-3px) scale(1.05);box-shadow:0 0 25px rgba(6,182,212,0.6);} }
+
+        /* ===== مرحلة العجلة الديناميكية ===== */
         .wheel-stage {
-            position: relative; width: 340px; height: 340px; margin: 16px auto;
+            position: relative;
+            margin: 16px auto;
+            /* الحجم يُحدد ديناميكياً عبر JS */
         }
         .wheel-outer-ring {
-            position: absolute; inset: -12px; border-radius: 50%;
+            position: absolute; border-radius: 50%;
             border: 2px solid rgba(251,191,36,0.2);
             animation: ringRotate 20s linear infinite;
         }
         .wheel-outer-ring-2 {
-            position: absolute; inset: -20px; border-radius: 50%;
+            position: absolute; border-radius: 50%;
             border: 1px solid rgba(251,191,36,0.08);
             animation: ringRotate 30s linear infinite reverse;
         }
-        @keyframes ringRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes ringRotate { from{transform:rotate(0deg);}to{transform:rotate(360deg);} }
         .wheel-glow {
-            position: absolute; inset: -30px;
+            position: absolute;
             background: radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 70%);
             filter: blur(25px); animation: glowPulse 3s ease-in-out infinite;
             border-radius: 50%; transition: background 0.5s;
         }
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.4; transform: scale(0.95); }
-            50% { opacity: 1; transform: scale(1.05); }
-        }
+        @keyframes glowPulse { 0%,100%{opacity:0.4;transform:scale(0.95);}50%{opacity:1;transform:scale(1.05);} }
         .pointer-box {
-            position: absolute; top: -24px; left: 50%;
-            transform: translateX(-50%); z-index: 50;
+            position: absolute; left: 50%; transform: translateX(-50%); z-index: 50;
             filter: drop-shadow(0 4px 12px rgba(0,0,0,0.9));
         }
         .pointer-box.bounce { animation: pointerBounce 0.12s ease-out; }
-        @keyframes pointerBounce {
-            0% { transform: translateX(-50%) scaleY(1); }
-            50% { transform: translateX(-50%) scaleY(0.82); }
-            100% { transform: translateX(-50%) scaleY(1); }
-        }
+        @keyframes pointerBounce { 0%{transform:translateX(-50%) scaleY(1);}50%{transform:translateX(-50%) scaleY(0.82);}100%{transform:translateX(-50%) scaleY(1);} }
+        #wheelCanvas { display: block; border-radius: 50%; }
+
         .spin-btn-main {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 82px; height: 82px; border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            border-radius: 50%;
             background: linear-gradient(145deg, #fcd34d, #f59e0b, #d97706);
             border: 3px solid rgba(255,255,255,0.8);
-            color: #000; font-weight: 900; font-size: 0.95rem;
-            cursor: pointer; z-index: 40;
+            color: #000; font-weight: 900; cursor: pointer; z-index: 40;
             box-shadow: 0 0 20px rgba(251,191,36,0.4), 0 0 40px rgba(251,191,36,0.1), inset 0 1px 0 rgba(255,255,255,0.4);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             line-height: 1.3; text-shadow: 0 1px 0 rgba(255,255,255,0.3);
         }
-        .spin-btn-main:hover:not(:disabled) {
-            transform: translate(-50%, -50%) scale(1.08);
-            box-shadow: 0 0 30px rgba(251,191,36,0.6), 0 0 60px rgba(251,191,36,0.2);
-        }
-        .spin-btn-main:active:not(:disabled) { transform: translate(-50%, -50%) scale(0.95); }
-        .spin-btn-main:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+        .spin-btn-main:hover:not(:disabled) { transform:translate(-50%,-50%) scale(1.08); box-shadow:0 0 30px rgba(251,191,36,0.6),0 0 60px rgba(251,191,36,0.2); }
+        .spin-btn-main:active:not(:disabled) { transform:translate(-50%,-50%) scale(0.95); }
+        .spin-btn-main:disabled { opacity:0.4; cursor:not-allowed; filter:grayscale(0.5); }
         .spin-btn-main.free-spin-active {
-            background: linear-gradient(145deg, #22d3ee, #06b6d4, #0891b2);
-            box-shadow: 0 0 25px rgba(6,182,212,0.5), 0 0 50px rgba(6,182,212,0.15);
-            animation: freeBtnGlow 2s ease-in-out infinite;
+            background:linear-gradient(145deg,#22d3ee,#06b6d4,#0891b2);
+            box-shadow:0 0 25px rgba(6,182,212,0.5),0 0 50px rgba(6,182,212,0.15);
+            animation:freeBtnGlow 2s ease-in-out infinite;
         }
-        @keyframes freeBtnGlow {
-            0%, 100% { box-shadow: 0 0 25px rgba(6,182,212,0.5); }
-            50% { box-shadow: 0 0 40px rgba(6,182,212,0.8), 0 0 60px rgba(6,182,212,0.3); }
-        }
-        .spin-btn-main.spinning { animation: spinBtnPulse 0.5s ease-in-out infinite; }
-        @keyframes spinBtnPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.4); }
-            50% { box-shadow: 0 0 35px rgba(251,191,36,0.7); }
-        }
-        .led-ring { position: absolute; inset: -6px; border-radius: 50%; z-index: 5; pointer-events: none; }
+        @keyframes freeBtnGlow { 0%,100%{box-shadow:0 0 25px rgba(6,182,212,0.5);}50%{box-shadow:0 0 40px rgba(6,182,212,0.8),0 0 60px rgba(6,182,212,0.3);} }
+        .spin-btn-main.spinning { animation:spinBtnPulse 0.5s ease-in-out infinite; }
+        @keyframes spinBtnPulse { 0%,100%{box-shadow:0 0 20px rgba(251,191,36,0.4);}50%{box-shadow:0 0 35px rgba(251,191,36,0.7);} }
+
+        .led-ring { position:absolute; border-radius:50%; z-index:5; pointer-events:none; }
         .led-dot {
-            position: absolute; width: 5px; height: 5px; border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent), 0 0 12px rgba(251,191,36,0.3);
-            transition: opacity 0.1s;
+            position:absolute; width:5px; height:5px; border-radius:50%;
+            background:var(--accent);
+            box-shadow:0 0 6px var(--accent),0 0 12px rgba(251,191,36,0.3);
+            transition:opacity 0.1s;
         }
-        .led-dot.off { opacity: 0.15; box-shadow: none; }
-        .confetti-canvas { position: fixed; inset: 0; z-index: 150; pointer-events: none; }
+        .led-dot.off { opacity:0.15; box-shadow:none; }
+
+        .confetti-canvas { position:fixed; inset:0; z-index:150; pointer-events:none; }
         .result-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(15px); display: flex; align-items: center;
-            justify-content: center; z-index: 200;
-            opacity: 0; visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position:fixed; inset:0; background:rgba(0,0,0,0.85);
+            backdrop-filter:blur(15px); display:flex; align-items:center; justify-content:center;
+            z-index:200; opacity:0; visibility:hidden;
+            transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
         }
-        .result-modal.show { opacity: 1; visibility: visible; }
+        .result-modal.show { opacity:1; visibility:visible; }
         .result-box {
-            background: linear-gradient(160deg, rgba(30,30,55,0.98), rgba(15,15,30,0.98));
-            border: 2px solid var(--accent); border-radius: 28px;
-            padding: 2.5rem 2rem; text-align: center;
-            max-width: 330px; width: 90%;
-            transform: scale(0.5) translateY(40px);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 60px rgba(251,191,36,0.15), 0 25px 50px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
+            background:linear-gradient(160deg,rgba(30,30,55,0.98),rgba(15,15,30,0.98));
+            border:2px solid var(--accent); border-radius:28px;
+            padding:2.5rem 2rem; text-align:center; max-width:330px; width:90%;
+            transform:scale(0.5) translateY(40px);
+            transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow:0 0 60px rgba(251,191,36,0.15),0 25px 50px rgba(0,0,0,0.5);
+            position:relative; overflow:hidden;
         }
-        .result-modal.show .result-box { transform: scale(1) translateY(0); }
+        .result-modal.show .result-box { transform:scale(1) translateY(0); }
         .result-box::before {
-            content: ''; position: absolute; inset: -2px; border-radius: 28px;
-            background: conic-gradient(from 0deg, transparent, rgba(251,191,36,0.2), transparent, rgba(251,191,36,0.2), transparent);
-            animation: borderSpin 3s linear infinite; z-index: -1;
+            content:''; position:absolute; inset:-2px; border-radius:28px;
+            background:conic-gradient(from 0deg,transparent,rgba(251,191,36,0.2),transparent,rgba(251,191,36,0.2),transparent);
+            animation:borderSpin 3s linear infinite; z-index:-1;
         }
-        @keyframes borderSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .result-box.lose-box { border-color: var(--danger); }
-        .result-box.lose-box::before {
-            background: conic-gradient(from 0deg, transparent, rgba(239,68,68,0.15), transparent, rgba(239,68,68,0.15), transparent);
-        }
+        @keyframes borderSpin { from{transform:rotate(0deg);}to{transform:rotate(360deg);} }
+        .result-box.lose-box { border-color:var(--danger); }
+        .result-box.lose-box::before { background:conic-gradient(from 0deg,transparent,rgba(239,68,68,0.15),transparent,rgba(239,68,68,0.15),transparent); }
         .res-icon {
-            font-size: 4rem; display: inline-block;
-            animation: iconEntry 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            animation-delay: 0.2s; opacity: 0; transform: scale(0);
+            font-size:4rem; display:inline-block;
+            animation:iconEntry 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            animation-delay:0.2s; opacity:0; transform:scale(0);
         }
-        @keyframes iconEntry { to { opacity: 1; transform: scale(1) rotate(10deg); } }
+        @keyframes iconEntry { to{opacity:1;transform:scale(1) rotate(10deg);} }
         .result-prize-text {
-            font-size: 2rem; font-weight: 900;
-            background: linear-gradient(180deg, #fef3c7, #f59e0b);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size:2rem; font-weight:900;
+            background:linear-gradient(180deg,#fef3c7,#f59e0b);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
         }
         .result-prize-text.lose-text {
-            background: linear-gradient(180deg, #fca5a5, #ef4444);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background:linear-gradient(180deg,#fca5a5,#ef4444);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
         }
         .result-ok-btn {
-            width: 100%; padding: 14px; border-radius: 16px;
-            font-weight: 900; font-size: 1rem; border: none; cursor: pointer;
-            background: linear-gradient(135deg, #fcd34d, #f59e0b);
-            color: #000; box-shadow: 0 4px 20px rgba(251,191,36,0.3);
-            transition: all 0.3s; margin-top: 1.5rem;
+            width:100%; padding:14px; border-radius:16px; font-weight:900; font-size:1rem;
+            border:none; cursor:pointer;
+            background:linear-gradient(135deg,#fcd34d,#f59e0b); color:#000;
+            box-shadow:0 4px 20px rgba(251,191,36,0.3); transition:all 0.3s; margin-top:1.5rem;
         }
-        .result-ok-btn:active { transform: scale(0.96); }
+        .result-ok-btn:active { transform:scale(0.96); }
         .result-ok-btn.lose-btn {
-            background: linear-gradient(135deg, #f87171, #ef4444);
-            color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+            background:linear-gradient(135deg,#f87171,#ef4444); color:#fff;
+            box-shadow:0 4px 20px rgba(239,68,68,0.3);
         }
         .toast {
-            position: fixed; bottom: 90px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: linear-gradient(135deg, rgba(30,30,55,0.98), rgba(20,20,40,0.98));
-            border: 1px solid var(--danger); padding: 14px 28px; border-radius: 16px;
-            font-weight: 700; z-index: 300; opacity: 0;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            white-space: nowrap;
+            position:fixed; bottom:90px; left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:linear-gradient(135deg,rgba(30,30,55,0.98),rgba(20,20,40,0.98));
+            border:1px solid var(--danger); padding:14px 28px; border-radius:16px;
+            font-weight:700; z-index:300; opacity:0;
+            transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            backdrop-filter:blur(15px); box-shadow:0 10px 30px rgba(0,0,0,0.5); white-space:nowrap;
         }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .shake { animation: shakeIt 0.5s ease-in-out; }
-        @keyframes shakeIt {
-            0%, 100% { transform: translateX(0); }
-            15% { transform: translateX(-8px) rotate(-1deg); }
-            30% { transform: translateX(8px) rotate(1deg); }
-            45% { transform: translateX(-6px); }
-            60% { transform: translateX(6px); }
-            75% { transform: translateX(-3px); }
-            90% { transform: translateX(3px); }
-        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .shake { animation:shakeIt 0.5s ease-in-out; }
+        @keyframes shakeIt { 0%,100%{transform:translateX(0);}15%{transform:translateX(-8px) rotate(-1deg);}30%{transform:translateX(8px) rotate(1deg);}45%{transform:translateX(-6px);}60%{transform:translateX(6px);}75%{transform:translateX(-3px);}90%{transform:translateX(3px);} }
         .balance-change {
-            position: absolute; font-weight: 900; font-size: 1.2rem;
-            pointer-events: none; z-index: 100;
-            animation: floatUp 1.5s ease-out forwards;
+            position:absolute; font-weight:900; font-size:1.2rem; pointer-events:none; z-index:100;
+            animation:floatUp 1.5s ease-out forwards;
         }
-        .balance-change.win { color: var(--success); text-shadow: 0 0 10px rgba(16,185,129,0.5); }
-        .balance-change.lose-c { color: var(--danger); text-shadow: 0 0 10px rgba(239,68,68,0.5); }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
-        }
-        .fancy-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(251,191,36,0.2), transparent);
-            margin: 0 auto; width: 60%;
-        }
+        .balance-change.win { color:var(--success); text-shadow:0 0 10px rgba(16,185,129,0.5); }
+        .balance-change.lose-c { color:var(--danger); text-shadow:0 0 10px rgba(239,68,68,0.5); }
+        @keyframes floatUp { 0%{opacity:1;transform:translateY(0) scale(1);}50%{opacity:1;transform:translateY(-30px) scale(1.2);}100%{opacity:0;transform:translateY(-60px) scale(0.8);} }
+        .fancy-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(251,191,36,0.2),transparent); margin:0 auto; width:60%; }
         .sound-toggle {
-            position: fixed; top: 12px; left: 12px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(30,30,55,0.8); border: 1px solid rgba(255,255,255,0.1);
-            color: white; font-size: 1rem; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; z-index: 100;
-            backdrop-filter: blur(10px); transition: all 0.3s;
+            position:fixed; top:12px; left:12px; width:36px; height:36px; border-radius:50%;
+            background:rgba(30,30,55,0.8); border:1px solid rgba(255,255,255,0.1);
+            color:white; font-size:1rem; display:flex; align-items:center; justify-content:center;
+            cursor:pointer; z-index:100; backdrop-filter:blur(10px); transition:all 0.3s;
         }
-        .sound-toggle:active { transform: scale(0.9); }
-        @media (max-height: 700px) {
-            .wheel-stage { width: 280px; height: 280px; margin: 8px auto; }
-            .jackpot-value { font-size: 1.6rem; }
-            .balance-num { font-size: 1.3rem; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
+        .sound-toggle:active { transform:scale(0.9); }
+        @media (prefers-reduced-motion:reduce) {
+            *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
         }
     </style>
 </head>
@@ -370,9 +278,10 @@
             <a href="https://t.me/ichancey_cash_bot?start=deposit" class="deposit-btn">إيداع</a>
         </div>
     </section>
+
     <section class="wheel-stage mb-6" id="wheelStage">
-        <div class="wheel-outer-ring-2"></div>
-        <div class="wheel-outer-ring"></div>
+        <div class="wheel-outer-ring-2" id="ring2"></div>
+        <div class="wheel-outer-ring" id="ring1"></div>
         <div class="wheel-glow" id="wheelGlow"></div>
         <div class="led-ring" id="ledRing"></div>
         <div class="pointer-box" id="pointerBox">
@@ -382,15 +291,13 @@
                         <stop offset="0%" stop-color="#fcd34d"/>
                         <stop offset="100%" stop-color="#f59e0b"/>
                     </linearGradient>
-                    <filter id="ptrShadow">
-                        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.7"/>
-                    </filter>
+                    <filter id="ptrShadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.7"/></filter>
                 </defs>
                 <path d="M14 40 L1 8 Q0 0 5 0 L23 0 Q28 0 27 8 Z" fill="url(#ptrGrad)" filter="url(#ptrShadow)" stroke="#fff" stroke-width="1.5"/>
                 <circle cx="14" cy="7" r="3" fill="#fff" opacity="0.5"/>
             </svg>
         </div>
-        <canvas id="wheelCanvas" width="340" height="340"></canvas>
+        <canvas id="wheelCanvas"></canvas>
         <button class="spin-btn-main" id="btnSpin" aria-label="دوران العجلة">دور<br>الآن</button>
     </section>
 </main>
@@ -410,23 +317,19 @@
 <div class="toast" id="toastBox" role="alert"></div>
 
 <script>
-const CONFIG = {
-    pricePerSpin: 2500,
-    baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev'
-};
+const CONFIG = { pricePerSpin: 2500, baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev' };
 
-/* جوائز افتراضية - تُستبدل فوراً من السيرفر */
 let PRIZES = [
-    { label: '100,000', sub: 'ل.س', color: '#b91c1c', colorEnd: '#ef4444', type: 'cash', icon: '💎' },
-    { label: '2,500', sub: 'ل.س', color: '#1e3a5f', colorEnd: '#3b82f6', type: 'cash', icon: '🪙' },
-    { label: '50,000', sub: 'ل.س', color: '#15803d', colorEnd: '#22c55e', type: 'cash', icon: '💰' },
-    { label: '5,000', sub: 'ل.س', color: '#155e75', colorEnd: '#0891b2', type: 'cash', icon: '🪙' },
-    { label: '30,000', sub: 'ل.س', color: '#166534', colorEnd: '#16a34a', type: 'cash', icon: '💰' },
-    { label: 'لفة مجانية', sub: 'هدية', color: '#0e7490', colorEnd: '#06b6d4', type: 'free_spin', icon: '🔄' },
-    { label: '15,000', sub: 'ل.س', color: '#065f46', colorEnd: '#059669', type: 'cash', icon: '💵' },
-    { label: '10,000', sub: 'ل.س', color: '#047857', colorEnd: '#10b981', type: 'cash', icon: '💵' },
-    { label: '25,000', sub: 'ل.س', color: '#14532d', colorEnd: '#15803d', type: 'cash', icon: '💵' },
-    { label: 'حظ أوفر', sub: 'خسارة', color: '#1f2937', colorEnd: '#374151', type: 'lose', icon: '💔' },
+    { label:'100,000', sub:'ل.س', color:'#b91c1c', colorEnd:'#ef4444', type:'cash', icon:'💎' },
+    { label:'2,500', sub:'ل.س', color:'#1e3a5f', colorEnd:'#3b82f6', type:'cash', icon:'🪙' },
+    { label:'50,000', sub:'ل.س', color:'#15803d', colorEnd:'#22c55e', type:'cash', icon:'💰' },
+    { label:'5,000', sub:'ل.س', color:'#155e75', colorEnd:'#0891b2', type:'cash', icon:'🪙' },
+    { label:'30,000', sub:'ل.س', color:'#166534', colorEnd:'#16a34a', type:'cash', icon:'💰' },
+    { label:'لفة مجانية', sub:'هدية', color:'#0e7490', colorEnd:'#06b6d4', type:'free_spin', icon:'🔄' },
+    { label:'15,000', sub:'ل.س', color:'#065f46', colorEnd:'#059669', type:'cash', icon:'💵' },
+    { label:'10,000', sub:'ل.س', color:'#047857', colorEnd:'#10b981', type:'cash', icon:'💵' },
+    { label:'25,000', sub:'ل.س', color:'#14532d', colorEnd:'#15803d', type:'cash', icon:'💵' },
+    { label:'حظ أوفر', sub:'خسارة', color:'#1f2937', colorEnd:'#374151', type:'lose', icon:'💔' },
 ];
 
 let NUM_SLICES = PRIZES.length;
@@ -439,7 +342,223 @@ function updateGeometry() {
     sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
 }
 
-/* جلب الجوائز الحية من السيرفر */
+/* ===== حساب أبعاد العجلة حسب عدد الشرائح ===== */
+let W = {}; // أبعاد العجلة الحالية
+
+function calcWheelSize() {
+    const n = NUM_SLICES;
+    /* الحد الأقصى للعرض المتاح (مع مراعاة الحواف) */
+    const maxW = Math.min(window.innerWidth - 40, 460);
+    /* الحد الأقصى للارتفاع المتاح */
+    const maxH = Math.min(window.innerHeight - 340, 460);
+
+    let canvasSize, radius, fontSize, btnSize, ptrW, ptrH;
+
+    if (n <= 8) {
+        canvasSize = 320; radius = 145; fontSize = 14; btnSize = 78; ptrW = 26; ptrH = 38;
+    } else if (n <= 10) {
+        canvasSize = 340; radius = 155; fontSize = 13; btnSize = 82; ptrW = 28; ptrH = 40;
+    } else if (n <= 14) {
+        canvasSize = 380; radius = 175; fontSize = 11.5; btnSize = 76; ptrW = 26; ptrH = 36;
+    } else if (n <= 18) {
+        canvasSize = 420; radius = 195; fontSize = 10.5; btnSize = 72; ptrW = 24; ptrH = 34;
+    } else if (n <= 22) {
+        canvasSize = 450; radius = 210; fontSize = 9.5; btnSize = 68; ptrW = 22; ptrH = 32;
+    } else {
+        canvasSize = 480; radius = 225; fontSize = 9; btnSize = 64; ptrW = 20; ptrH = 30;
+    }
+
+    /* تقليص إذا تجاوز الحد الأقصى */
+    if (canvasSize > maxW || canvasSize > maxH) {
+        const scale = Math.min(maxW / canvasSize, maxH / canvasSize, 1);
+        canvasSize = Math.floor(canvasSize * scale);
+        radius = Math.floor(radius * scale);
+        fontSize = Math.max(8, fontSize * scale);
+        btnSize = Math.floor(btnSize * scale);
+        ptrW = Math.floor(ptrW * scale);
+        ptrH = Math.floor(ptrH * scale);
+    }
+
+    W = {
+        canvas: canvasSize, radius: radius, font: fontSize,
+        btn: btnSize, ptrW: ptrW, ptrH: ptrH,
+        cCX: canvasSize / 2, cCY: canvasSize / 2,
+        ledR: canvasSize / 2 + 4,
+        ring1Inset: 12, ring2Inset: 20, glowInset: 30,
+        ptrTop: -Math.floor(ptrH * 0.6),
+        centerR: Math.floor(btnSize * 0.46)
+    };
+}
+
+function applyWheelSize() {
+    const s = W;
+    const stage = document.getElementById('wheelStage');
+    const cv = document.getElementById('wheelCanvas');
+    const btn = document.getElementById('btnSpin');
+    const ptr = document.getElementById('pointerBox');
+    const r1 = document.getElementById('ring1');
+    const r2 = document.getElementById('ring2');
+    const glow = document.getElementById('wheelGlow');
+    const ptrSvg = ptr.querySelector('svg');
+
+    /* المرحلة */
+    stage.style.width = s.canvas + 'px';
+    stage.style.height = s.canvas + 'px';
+
+    /* الكانفاس */
+    cv.width = s.canvas;
+    cv.height = s.canvas;
+    cv.style.width = s.canvas + 'px';
+    cv.style.height = s.canvas + 'px';
+
+    /* الحلقات الخارجية */
+    r1.style.inset = '-' + s.ring1Inset + 'px';
+    r2.style.inset = '-' + s.ring2Inset + 'px';
+    glow.style.inset = '-' + s.glowInset + 'px';
+
+    /* السهم */
+    ptr.style.top = s.ptrTop + 'px';
+    ptrSvg.setAttribute('width', s.ptrW);
+    ptrSvg.setAttribute('height', s.ptrH);
+
+    /* زر الدوران */
+    btn.style.width = s.btn + 'px';
+    btn.style.height = s.btn + 'px';
+    btn.style.fontSize = Math.max(0.75, s.btn / 86) + 'rem';
+
+    /* إعادة بناء الـ LED */
+    rebuildLEDs();
+
+    /* رسم العجلة */
+    drawWheel();
+}
+
+/* ===== بناء LED ديناميكي ===== */
+let ledD = [];
+function rebuildLEDs() {
+    const ring = document.getElementById('ledRing');
+    ring.innerHTML = '';
+    ring.style.inset = '-6px';
+    ledD = [];
+    const cx = W.canvas / 2, cy = W.canvas / 2, r = W.ledR;
+    const count = NUM_SLICES <= 14 ? 30 : (NUM_SLICES <= 20 ? 36 : 44);
+    for (let i = 0; i < count; i++) {
+        const a = (i / count) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + r * Math.cos(a) - 2.5;
+        const y = cy + r * Math.sin(a) - 2.5;
+        const d = document.createElement('div');
+        d.className = 'led-dot';
+        d.style.left = x + 'px';
+        d.style.top = y + 'px';
+        ring.appendChild(d);
+        ledD.push(d);
+    }
+}
+
+/* ===== رسم العجلة ===== */
+const cv = document.getElementById('wheelCanvas');
+const cx = cv.getContext('2d');
+
+function drawWheel() {
+    const s = W;
+    cx.clearRect(0, 0, s.canvas, s.canvas);
+
+    /* ظل */
+    cx.save();
+    cx.beginPath();
+    cx.arc(s.cCX, s.cCY + 4, s.radius + 4, 0, Math.PI * 2);
+    cx.fillStyle = 'rgba(0,0,0,0.3)';
+    cx.filter = 'blur(8px)';
+    cx.fill();
+    cx.restore();
+
+    /* شرائح */
+    PRIZES.forEach((p, i) => {
+        const sa = i * sliceAngleRad - Math.PI / 2;
+        const ea = sa + sliceAngleRad;
+        const gr = cx.createRadialGradient(s.cCX, s.cCY, 20, s.cCX, s.cCY, s.radius);
+        gr.addColorStop(0, p.colorEnd);
+        gr.addColorStop(1, p.color);
+        cx.beginPath();
+        cx.moveTo(s.cCX, s.cCY);
+        cx.arc(s.cCX, s.cCY, s.radius, sa, ea);
+        cx.closePath();
+        cx.fillStyle = gr;
+        cx.fill();
+        cx.strokeStyle = 'rgba(0,0,0,0.5)';
+        cx.lineWidth = 2;
+        cx.stroke();
+
+        /* نص الشريحة */
+        cx.save();
+        cx.translate(s.cCX, s.cCY);
+        cx.rotate(sa + sliceAngleRad / 2);
+        cx.translate(s.radius * 0.68, 0);
+        cx.rotate(Math.PI / 2);
+        cx.fillStyle = '#fff';
+        cx.shadowColor = 'rgba(0,0,0,0.8)';
+        cx.shadowBlur = 4;
+        cx.textAlign = 'center';
+
+        cx.font = s.font + 'px sans-serif';
+        cx.fillText(p.icon, 0, -(s.font + 3));
+
+        cx.font = 'bold ' + s.font + 'px Tajawal';
+        cx.fillText(p.label, 0, 0);
+
+        cx.font = Math.max(7, s.font - 4) + 'px Tajawal';
+        cx.fillStyle = 'rgba(255,255,255,0.7)';
+        cx.fillText(p.sub, 0, s.font + 2);
+        cx.restore();
+    });
+
+    /* حلقة خارجية ذهبية */
+    cx.beginPath();
+    cx.arc(s.cCX, s.cCY, s.radius + 2, 0, Math.PI * 2);
+    cx.strokeStyle = 'rgba(251,191,36,0.3)';
+    cx.lineWidth = 3;
+    cx.stroke();
+
+    /* نقاط الحلقة */
+    const dotCount = Math.max(30, NUM_SLICES * 4);
+    for (let i = 0; i < dotCount; i++) {
+        const a = (i / dotCount) * Math.PI * 2;
+        const x = s.cCX + (s.radius + 2) * Math.cos(a);
+        const y = s.cCY + (s.radius + 2) * Math.sin(a);
+        cx.beginPath();
+        cx.arc(x, y, 1.5, 0, Math.PI * 2);
+        cx.fillStyle = i % 2 === 0 ? 'rgba(251,191,36,0.6)' : 'rgba(255,255,255,0.2)';
+        cx.fill();
+    }
+
+    /* مركز العجلة */
+    const cg = cx.createRadialGradient(s.cCX, s.cCY, 0, s.cCX, s.cCY, s.centerR);
+    cg.addColorStop(0, '#2a2a45');
+    cg.addColorStop(0.7, '#1a1a30');
+    cg.addColorStop(1, '#0f0f20');
+    cx.beginPath();
+    cx.arc(s.cCX, s.cCY, s.centerR, 0, Math.PI * 2);
+    cx.fillStyle = cg;
+    cx.fill();
+    cx.strokeStyle = 'rgba(251,191,36,0.5)';
+    cx.lineWidth = 2.5;
+    cx.stroke();
+    cx.beginPath();
+    cx.arc(s.cCX, s.cCY, s.centerR - 8, 0, Math.PI * 2);
+    cx.strokeStyle = 'rgba(251,191,36,0.15)';
+    cx.lineWidth = 1;
+    cx.stroke();
+}
+
+/* ===== حالة التطبيق ===== */
+let state = {
+    balance: 0, jackpot: 15000000, isSpinning: false,
+    currentRotation: 0, userId: null, userName: 'زائر',
+    hasFreeSpin: false, soundOn: true
+};
+let tgApp = null;
+
+/* ===== جلب الجوائز ===== */
 async function loadPrizes() {
     try {
         const r = await fetch(CONFIG.baseUrl + '/api/get_prizes', {
@@ -454,19 +573,13 @@ async function loadPrizes() {
                 type: p.type || p.prize_type, icon: p.icon
             }));
             updateGeometry();
-            drawWheel();
+            calcWheelSize();
+            applyWheelSize();
         }
     } catch(e) { console.log('جوائز افتراضية'); }
 }
 
-let state = {
-    balance: 0, jackpot: 15000000, isSpinning: false,
-    currentRotation: 0, userId: null, userName: 'زائر',
-    hasFreeSpin: false, soundOn: true
-};
-let tgApp = null;
-
-/* === صوت === */
+/* ===== صوت ===== */
 let audioCtx = null;
 function getAC() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
 function playTick() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(1200,c.currentTime); o.frequency.exponentialRampToValueAtTime(800,c.currentTime+0.05); g.gain.setValueAtTime(0.15,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.08); o.start(c.currentTime); o.stop(c.currentTime+0.08); } catch(e){} }
@@ -475,7 +588,7 @@ function playWin() { if (!state.soundOn) return; try { const c=getAC(); [523,659
 function playLose() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sawtooth'; o.frequency.setValueAtTime(300,c.currentTime); o.frequency.exponentialRampToValueAtTime(100,c.currentTime+0.5); g.gain.setValueAtTime(0.12,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5); o.start(c.currentTime); o.stop(c.currentTime+0.5); } catch(e){} }
 function playClick() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(600,c.currentTime); g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.06); o.start(c.currentTime); o.stop(c.currentTime+0.06); } catch(e){} }
 
-/* === خلفية === */
+/* ===== خلفية ===== */
 const bgC = document.getElementById('bgCanvas'), bgX = bgC.getContext('2d');
 let bgP = [];
 function rsBg() { bgC.width = innerWidth; bgC.height = innerHeight; }
@@ -483,68 +596,23 @@ rsBg(); addEventListener('resize', rsBg);
 (function(){ const n=Math.min(50,Math.floor(innerWidth*innerHeight/18000)); for(let i=0;i<n;i++) bgP.push({x:Math.random()*bgC.width,y:Math.random()*bgC.height,r:Math.random()*1.5+0.3,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.25-0.08,a:Math.random()*0.35+0.1,c:Math.random()>0.7?'251,191,36':Math.random()>0.5?'6,182,212':'255,255,255'}); })();
 (function d(){ bgX.clearRect(0,0,bgC.width,bgC.height); bgP.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=bgC.width; if(p.x>bgC.width)p.x=0; if(p.y<0)p.y=bgC.height; if(p.y>bgC.height)p.y=0; bgX.beginPath(); bgX.arc(p.x,p.y,Math.max(0.1,p.r),0,Math.PI*2); bgX.fillStyle=`rgba(${p.c},${p.a})`; bgX.fill(); }); requestAnimationFrame(d); })();
 
-/* === LED === */
-let ledD=[],ledS=0,ledBI=null,ledFI=null;
-(function(){ const r=document.getElementById('ledRing'),w=340,cx=w/2,cy=w/2,rd=w/2+4; for(let i=0;i<30;i++){ const a=(i/30)*Math.PI*2-Math.PI/2,x=cx+rd*Math.cos(a)-2.5,y=cy+rd*Math.sin(a)-2.5,d=document.createElement('div'); d.className='led-dot'; d.style.left=x+'px'; d.style.top=y+'px'; r.appendChild(d); ledD.push(d); } })();
-function animLED(){ ledD.forEach((d,i)=>{ const on=(i+ledS)%3===0; d.classList.toggle('off',!on); if(on){ const c=['#fbbf24','#f59e0b','#fcd34d'][(i+ledS)%3]; d.style.background=c; d.style.boxShadow=`0 0 6px ${c}, 0 0 12px rgba(251,191,36,0.3)`; } }); ledS++; }
-function startLEDN(){ stopLEDF(); if(!ledBI) ledBI=setInterval(animLED,400); }
-function stopLEDN(){ if(ledBI){clearInterval(ledBI);ledBI=null;} }
-function startLEDF(){ stopLEDN(); if(!ledFI) ledFI=setInterval(animLED,80); }
-function stopLEDF(){ if(ledFI){clearInterval(ledFI);ledFI=null;} }
+/* ===== LED ===== */
+let ledS = 0, ledBI = null, ledFI = null;
+function animLED() { ledD.forEach((d,i) => { const on=(i+ledS)%3===0; d.classList.toggle('off',!on); if(on){ const c=['#fbbf24','#f59e0b','#fcd34d'][(i+ledS)%3]; d.style.background=c; d.style.boxShadow=`0 0 6px ${c}, 0 0 12px rgba(251,191,36,0.3)`; } }); ledS++; }
+function startLEDN() { stopLEDF(); if(!ledBI) ledBI=setInterval(animLED,400); }
+function stopLEDN() { if(ledBI){clearInterval(ledBI);ledBI=null;} }
+function startLEDF() { stopLEDN(); if(!ledFI) ledFI=setInterval(animLED,80); }
+function stopLEDF() { if(ledFI){clearInterval(ledFI);ledFI=null;} }
 startLEDN();
 
-/* === رسم العجلة === */
-const cv = document.getElementById('wheelCanvas'), cx = cv.getContext('2d');
-const cCX = cv.width/2, cCY = cv.height/2, wR = 155;
-
-function drawWheel() {
-    cx.clearRect(0, 0, cv.width, cv.height);
-    /* ظل */
-    cx.save(); cx.beginPath(); cx.arc(cCX, cCY+4, wR+4, 0, Math.PI*2);
-    cx.fillStyle='rgba(0,0,0,0.3)'; cx.filter='blur(8px)'; cx.fill(); cx.restore();
-    /* شرائح */
-    PRIZES.forEach((p, i) => {
-        const sa = i * sliceAngleRad - Math.PI/2, ea = sa + sliceAngleRad;
-        const gr = cx.createRadialGradient(cCX, cCY, 20, cCX, cCY, wR);
-        gr.addColorStop(0, p.colorEnd); gr.addColorStop(1, p.color);
-        cx.beginPath(); cx.moveTo(cCX, cCY); cx.arc(cCX, cCY, wR, sa, ea);
-        cx.closePath(); cx.fillStyle = gr; cx.fill();
-        cx.strokeStyle = 'rgba(0,0,0,0.5)'; cx.lineWidth = 2; cx.stroke();
-        /* نص */
-        cx.save(); cx.translate(cCX, cCY); cx.rotate(sa + sliceAngleRad/2);
-        cx.translate(wR * 0.68, 0); cx.rotate(Math.PI/2);
-        cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,0.8)'; cx.shadowBlur = 4;
-        cx.textAlign = 'center';
-        const fontSize = NUM_SLICES > 12 ? 11 : (NUM_SLICES > 8 ? 12 : 13);
-        cx.font = `${fontSize-1}px sans-serif`; cx.fillText(p.icon, 0, -16);
-        cx.font = `bold ${fontSize}px Tajawal`; cx.fillText(p.label, 0, -1);
-        cx.font = `${fontSize-4}px Tajawal`; cx.fillStyle = 'rgba(255,255,255,0.7)';
-        cx.fillText(p.sub, 0, 11);
-        cx.restore();
-    });
-    /* حلقة خارجية */
-    cx.beginPath(); cx.arc(cCX, cCY, wR+2, 0, Math.PI*2);
-    cx.strokeStyle='rgba(251,191,36,0.3)'; cx.lineWidth=3; cx.stroke();
-    for(let i=0;i<40;i++){ const a=(i/40)*Math.PI*2, x=cCX+(wR+2)*Math.cos(a), y=cCY+(wR+2)*Math.sin(a);
-        cx.beginPath(); cx.arc(x,y,1.5,0,Math.PI*2);
-        cx.fillStyle=i%2===0?'rgba(251,191,36,0.6)':'rgba(255,255,255,0.2)'; cx.fill(); }
-    /* مركز */
-    const cg=cx.createRadialGradient(cCX,cCY,0,cCX,cCY,38);
-    cg.addColorStop(0,'#2a2a45'); cg.addColorStop(0.7,'#1a1a30'); cg.addColorStop(1,'#0f0f20');
-    cx.beginPath(); cx.arc(cCX,cCY,38,0,Math.PI*2); cx.fillStyle=cg; cx.fill();
-    cx.strokeStyle='rgba(251,191,36,0.5)'; cx.lineWidth=2.5; cx.stroke();
-    cx.beginPath(); cx.arc(cCX,cCY,30,0,Math.PI*2);
-    cx.strokeStyle='rgba(251,191,36,0.15)'; cx.lineWidth=1; cx.stroke();
-}
-
-/* === كونفيتي === */
+/* ===== كونفيتي ===== */
 const ccV=document.getElementById('confettiCanvas'), ccX=ccV.getContext('2d');
-let ccP=[],ccA=false;
+let ccP=[], ccA=false;
 function rsCC(){ccV.width=innerWidth;ccV.height=innerHeight;} rsCC(); addEventListener('resize',rsCC);
 function launchCC(){ ccP=[]; const cols=['#fbbf24','#fcd34d','#10b981','#06b6d4','#f43f5e','#8b5cf6','#fff']; for(let i=0;i<100;i++) ccP.push({x:ccV.width/2+(Math.random()-0.5)*200,y:ccV.height/2-100,vx:(Math.random()-0.5)*14,vy:-Math.random()*14-4,w:Math.random()*8+4,h:Math.random()*6+3,c:cols[Math.floor(Math.random()*cols.length)],r:Math.random()*360,rs:(Math.random()-0.5)*15,g:0.3+Math.random()*0.2,a:1,d:0.004+Math.random()*0.005}); ccA=true; aCC(); }
 function aCC(){ if(!ccA)return; ccX.clearRect(0,0,ccV.width,ccV.height); let alive=false; ccP.forEach(p=>{ if(p.a<=0)return; alive=true; p.x+=p.vx;p.vy+=p.g;p.y+=p.vy;p.vx*=0.98;p.r+=p.rs;p.a-=p.d; if(p.a<0)p.a=0; ccX.save();ccX.translate(p.x,p.y);ccX.rotate(p.r*Math.PI/180);ccX.globalAlpha=p.a;ccX.fillStyle=p.c;ccX.fillRect(-p.w/2,-p.h/2,p.w,p.h);ccX.restore(); }); if(alive)requestAnimationFrame(aCC); else{ccA=false;ccX.clearRect(0,0,ccV.width,ccV.height);} }
 
-/* === مساعدات === */
+/* ===== مساعدات ===== */
 function haptic(s){ try{if(tgApp&&tgApp.HapticFeedback)tgApp.HapticFeedback.impactOccurred(s);}catch(e){} }
 function showBC(amt,win){ const p=document.getElementById('userPanel'),e=document.createElement('div'); e.className='balance-change '+(win?'win':'lose-c'); e.textContent=(win?'+':'-')+amt.toLocaleString(); e.style.left='50%'; e.style.top='10px'; e.style.transform='translateX(-50%)'; p.style.position='relative'; p.appendChild(e); setTimeout(()=>{if(e.parentNode)e.remove();},1600); }
 
@@ -552,15 +620,18 @@ let tickRAF=null;
 function startTick(dur){ stopTick(); const st=performance.now(); let lt=0; const ptr=document.getElementById('pointerBox'); function t(now){ const el=now-st; if(el>=dur){stopTick();return;} const pr=el/dur,iv=80+pr*pr*420; if(el-lt>=iv){ playTick(); ptr.classList.remove('bounce'); void ptr.offsetWidth; ptr.classList.add('bounce'); lt=el; if(Math.random()>0.6)haptic('light'); } tickRAF=requestAnimationFrame(t); } tickRAF=requestAnimationFrame(t); }
 function stopTick(){ if(tickRAF){cancelAnimationFrame(tickRAF);tickRAF=null;} }
 
-/* === تيليجرام === */
+/* ===== تيليجرام ===== */
 async function initTG(){
     try{
         tgApp=window.Telegram.WebApp; tgApp.ready(); tgApp.expand();
         if(tgApp.initDataUnsafe&&tgApp.initDataUnsafe.user){
             state.userId=tgApp.initDataUnsafe.user.id;
+            calcWheelSize();
+            applyWheelSize();
             await loadPrizes();
             await fetchUD();
         } else {
+            calcWheelSize(); applyWheelSize();
             showToast("يجب فتح الموقع من البوت");
             document.getElementById('btnSpin').disabled=true;
             document.getElementById('btnSpin').innerHTML="🚫<br>ممنوع";
@@ -641,8 +712,18 @@ function updateUI(){
 function showToast(m){ const b=document.getElementById('toastBox'); b.textContent=m; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),3000); }
 document.getElementById('soundToggle').addEventListener('click',()=>{ state.soundOn=!state.soundOn; document.getElementById('soundToggle').textContent=state.soundOn?'🔊':'🔇'; playClick(); });
 
+/* ===== إعادة حساب الحجم عند تغيير حجم الشاشة ===== */
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        calcWheelSize();
+        applyWheelSize();
+    }, 200);
+});
+
 document.addEventListener('DOMContentLoaded',()=>{
-    drawWheel(); initTG();
+    initTG();
     document.getElementById('btnSpin').addEventListener('click',spin);
     const u=()=>{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();};
     document.body.addEventListener('click',u,{once:true});
