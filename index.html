@@ -383,7 +383,6 @@
         <div class="wheel-outer-ring"></div>
         <div class="wheel-glow" id="wheelGlow"></div>
         <div class="led-ring" id="ledRing"></div>
-
         <div class="pointer-box" id="pointerBox">
             <svg viewBox="0 0 28 40" width="28" height="40">
                 <defs>
@@ -399,7 +398,6 @@
                 <circle cx="14" cy="7" r="3" fill="#fff" opacity="0.5"/>
             </svg>
         </div>
-
         <canvas id="wheelCanvas" width="340" height="340"></canvas>
         <button class="spin-btn-main" id="btnSpin" aria-label="دوران العجلة">دور<br>الآن</button>
     </section>
@@ -426,24 +424,32 @@ const CONFIG = {
     baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev'
 };
 
-// ===== فئات الجوائز من 2,500 إلى 100,000 =====
-const PRIZES = [
+// ===== جوائز افتراضية (تُستبدل من السيرفر) =====
+let PRIZES = [
     { label: '100,000', sub: 'ل.س', color: '#b91c1c', colorEnd: '#ef4444', type: 'cash', icon: '💎' },
-    { label: '2,500',   sub: 'ل.س', color: '#1e3a5f', colorEnd: '#3b82f6', type: 'cash', icon: '🪙' },
-    { label: '50,000',  sub: 'ل.س', color: '#15803d', colorEnd: '#22c55e', type: 'cash', icon: '💰' },
-    { label: '5,000',   sub: 'ل.س', color: '#155e75', colorEnd: '#0891b2', type: 'cash', icon: '🪙' },
-    { label: '30,000',  sub: 'ل.س', color: '#166534', colorEnd: '#16a34a', type: 'cash', icon: '💰' },
+    { label: '2,500', sub: 'ل.س', color: '#1e3a5f', colorEnd: '#3b82f6', type: 'cash', icon: '🪙' },
+    { label: '50,000', sub: 'ل.س', color: '#15803d', colorEnd: '#22c55e', type: 'cash', icon: '💰' },
+    { label: '5,000', sub: 'ل.س', color: '#155e75', colorEnd: '#0891b2', type: 'cash', icon: '🪙' },
+    { label: '30,000', sub: 'ل.س', color: '#166534', colorEnd: '#16a34a', type: 'cash', icon: '💰' },
     { label: 'لفة مجانية', sub: 'هدية', color: '#0e7490', colorEnd: '#06b6d4', type: 'free_spin', icon: '🔄' },
-    { label: '15,000',  sub: 'ل.س', color: '#065f46', colorEnd: '#059669', type: 'cash', icon: '💵' },
-    { label: '10,000',  sub: 'ل.س', color: '#047857', colorEnd: '#10b981', type: 'cash', icon: '💵' },
-    { label: '25,000',  sub: 'ل.س', color: '#14532d', colorEnd: '#15803d', type: 'cash', icon: '💵' },
+    { label: '15,000', sub: 'ل.س', color: '#065f46', colorEnd: '#059669', type: 'cash', icon: '💵' },
+    { label: '10,000', sub: 'ل.س', color: '#047857', colorEnd: '#10b981', type: 'cash', icon: '💵' },
+    { label: '25,000', sub: 'ل.س', color: '#14532d', colorEnd: '#15803d', type: 'cash', icon: '💵' },
     { label: 'حظ أوفر', sub: 'خسارة', color: '#1f2937', colorEnd: '#374151', type: 'lose', icon: '💔' },
 ];
 
-// ===== ثوابت هندسية العجلة =====
-const NUM_SLICES = PRIZES.length;
-const SLICE_DEG = 360 / NUM_SLICES;
-const HALF_SLICE_DEG = SLICE_DEG / 2;
+// ===== متغيرات هندسية ديناميكية =====
+let NUM_SLICES = PRIZES.length;
+let SLICE_DEG = 360 / NUM_SLICES;
+let HALF_SLICE_DEG = SLICE_DEG / 2;
+let sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
+
+function updateWheelGeometry() {
+    NUM_SLICES = PRIZES.length;
+    SLICE_DEG = 360 / NUM_SLICES;
+    HALF_SLICE_DEG = SLICE_DEG / 2;
+    sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
+}
 
 // ===== حالة التطبيق =====
 let state = {
@@ -452,6 +458,32 @@ let state = {
     hasFreeSpin: false, soundOn: true
 };
 let tgApp = null;
+
+// ===== جلب الجوائز من السيرفر =====
+async function loadPrizes() {
+    try {
+        const res = await fetch(CONFIG.baseUrl + '/api/get_prizes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: state.userId || 0 })
+        });
+        const data = await res.json();
+        if (data.success && data.prizes && data.prizes.length > 0) {
+            PRIZES = data.prizes.map(p => ({
+                label: p.label,
+                sub: p.sub || 'ل.س',
+                color: p.color,
+                colorEnd: p.color_end,
+                type: p.type || p.prize_type,
+                icon: p.icon
+            }));
+            updateWheelGeometry();
+            drawWheel();
+        }
+    } catch(e) {
+        console.log('استخدام الجوائز الافتراضية');
+    }
+}
 
 // ===== نظام الصوت =====
 let audioCtx = null;
@@ -463,11 +495,8 @@ function getAudioCtx() {
 function playTick() {
     if (!state.soundOn) return;
     try {
-        const ctx = getAudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine';
+        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine';
         osc.frequency.setValueAtTime(1200, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.05);
         gain.gain.setValueAtTime(0.15, ctx.currentTime);
@@ -478,19 +507,13 @@ function playTick() {
 function playSpinStart() {
     if (!state.soundOn) return;
     try {
-        const ctx = getAudioCtx();
-        const noise = ctx.createBufferSource();
+        const ctx = getAudioCtx(); const noise = ctx.createBufferSource();
         const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
-        noise.buffer = buf;
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(200, ctx.currentTime);
-        filter.frequency.exponentialRampToValueAtTime(2000, ctx.currentTime + 0.4);
-        filter.Q.value = 2;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.3;
+        noise.buffer = buf; const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass'; filter.frequency.setValueAtTime(200, ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(2000, ctx.currentTime + 0.4); filter.Q.value = 2;
+        const gain = ctx.createGain(); gain.gain.setValueAtTime(0.3, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
         noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
         noise.start(ctx.currentTime); noise.stop(ctx.currentTime + 0.5);
@@ -501,39 +524,21 @@ function playWinSound() {
     try {
         const ctx = getAudioCtx();
         [523, 659, 784, 1047].forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'triangle';
+            const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination); osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
             gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
             gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.12 + 0.03);
             gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.4);
-            osc.start(ctx.currentTime + i * 0.12);
-            osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+            osc.start(ctx.currentTime + i * 0.12); osc.stop(ctx.currentTime + i * 0.12 + 0.4);
         });
-        setTimeout(() => {
-            try {
-                const ctx2 = getAudioCtx();
-                const osc2 = ctx2.createOscillator();
-                const g2 = ctx2.createGain();
-                osc2.connect(g2); g2.connect(ctx2.destination);
-                osc2.type = 'sine'; osc2.frequency.setValueAtTime(1047, ctx2.currentTime);
-                g2.gain.setValueAtTime(0.1, ctx2.currentTime);
-                g2.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 1);
-                osc2.start(ctx2.currentTime); osc2.stop(ctx2.currentTime + 1);
-            } catch(e) {}
-        }, 500);
     } catch(e) {}
 }
 function playLoseSound() {
     if (!state.soundOn) return;
     try {
-        const ctx = getAudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sawtooth';
+        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(300, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.5);
         gain.gain.setValueAtTime(0.12, ctx.currentTime);
@@ -544,11 +549,9 @@ function playLoseSound() {
 function playClickSound() {
     if (!state.soundOn) return;
     try {
-        const ctx = getAudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
+        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
         osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.06);
@@ -589,398 +592,8 @@ function drawBg() {
 }
 drawBg();
 
-// ===== LED لمبات =====
-let ledDots = [];
-let ledState = 0;
-let ledBaseInterval = null;
-let ledFastInterval = null;
+// ===== LED =====
+let ledDots = []; let ledState = 0; let ledBaseInterval = null; let ledFastInterval = null;
 function createLEDs() {
     const ringEl = document.getElementById('ledRing');
     const stageW = 340;
-    const cxC = stageW / 2, cyC = stageW / 2, r = stageW / 2 + 4;
-    for (let i = 0; i < 30; i++) {
-        const angle = (i / 30) * Math.PI * 2 - Math.PI / 2;
-        const x = cxC + r * Math.cos(angle) - 2.5;
-        const y = cyC + r * Math.sin(angle) - 2.5;
-        const dot = document.createElement('div');
-        dot.className = 'led-dot';
-        dot.style.left = x + 'px'; dot.style.top = y + 'px';
-        ringEl.appendChild(dot);
-        ledDots.push(dot);
-    }
-}
-createLEDs();
-function animateLEDs() {
-    ledDots.forEach((dot, i) => {
-        const on = (i + ledState) % 3 === 0;
-        dot.classList.toggle('off', !on);
-        if (on) {
-            const c = ['#fbbf24','#f59e0b','#fcd34d'][(i + ledState) % 3];
-            dot.style.background = c;
-            dot.style.boxShadow = `0 0 6px ${c}, 0 0 12px rgba(251,191,36,0.3)`;
-        }
-    });
-    ledState++;
-}
-function startLEDNormal() { stopLEDFast(); if (!ledBaseInterval) ledBaseInterval = setInterval(animateLEDs, 400); }
-function stopLEDNormal() { if (ledBaseInterval) { clearInterval(ledBaseInterval); ledBaseInterval = null; } }
-function startLEDFast() { stopLEDNormal(); if (!ledFastInterval) ledFastInterval = setInterval(animateLEDs, 80); }
-function stopLEDFast() { if (ledFastInterval) { clearInterval(ledFastInterval); ledFastInterval = null; } }
-startLEDNormal();
-
-// ===== رسم العجلة =====
-const canvas = document.getElementById('wheelCanvas');
-const ctx = canvas.getContext('2d');
-const cCX = canvas.width / 2;
-const cCY = canvas.height / 2;
-const wheelRadius = 155;
-const sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
-
-function drawWheel() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // ظل العجلة
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cCX, cCY + 4, wheelRadius + 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.filter = 'blur(8px)';
-    ctx.fill();
-    ctx.restore();
-
-    // رسم الشرائح
-    PRIZES.forEach((p, i) => {
-        const startAngle = i * sliceAngleRad - Math.PI / 2;
-        const endAngle = startAngle + sliceAngleRad;
-        const grad = ctx.createRadialGradient(cCX, cCY, 20, cCX, cCY, wheelRadius);
-        grad.addColorStop(0, p.colorEnd);
-        grad.addColorStop(1, p.color);
-        ctx.beginPath(); ctx.moveTo(cCX, cCY);
-        ctx.arc(cCX, cCY, wheelRadius, startAngle, endAngle);
-        ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2; ctx.stroke();
-
-        // نص الشريحة
-        ctx.save();
-        ctx.translate(cCX, cCY);
-        ctx.rotate(startAngle + sliceAngleRad / 2);
-        ctx.translate(wheelRadius * 0.68, 0);
-        ctx.rotate(Math.PI / 2);
-        ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 4;
-        ctx.textAlign = 'center';
-        ctx.font = '14px sans-serif';
-        ctx.fillText(p.icon, 0, -18);
-        ctx.font = 'bold 13px Tajawal';
-        ctx.fillText(p.label, 0, -2);
-        ctx.font = '9px Tajawal';
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.fillText(p.sub, 0, 12);
-        ctx.restore();
-    });
-
-    // حلقة خارجية ذهبية
-    ctx.beginPath();
-    ctx.arc(cCX, cCY, wheelRadius + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(251,191,36,0.3)'; ctx.lineWidth = 3; ctx.stroke();
-
-    // نقاط الحلقة
-    for (let i = 0; i < 40; i++) {
-        const a = (i / 40) * Math.PI * 2;
-        const x = cCX + (wheelRadius + 2) * Math.cos(a);
-        const y = cCY + (wheelRadius + 2) * Math.sin(a);
-        ctx.beginPath();
-        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = i % 2 === 0 ? 'rgba(251,191,36,0.6)' : 'rgba(255,255,255,0.2)';
-        ctx.fill();
-    }
-
-    // مركز العجلة
-    const centerGrad = ctx.createRadialGradient(cCX, cCY, 0, cCX, cCY, 38);
-    centerGrad.addColorStop(0, '#2a2a45');
-    centerGrad.addColorStop(0.7, '#1a1a30');
-    centerGrad.addColorStop(1, '#0f0f20');
-    ctx.beginPath(); ctx.arc(cCX, cCY, 38, 0, Math.PI * 2);
-    ctx.fillStyle = centerGrad; ctx.fill();
-    ctx.strokeStyle = 'rgba(251,191,36,0.5)'; ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(cCX, cCY, 30, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(251,191,36,0.15)'; ctx.lineWidth = 1; ctx.stroke();
-}
-
-// ===== كونفيتي =====
-const confettiCanvas = document.getElementById('confettiCanvas');
-const confCtx = confettiCanvas.getContext('2d');
-let confettiPieces = [];
-let confettiActive = false;
-function resizeConfetti() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
-resizeConfetti();
-window.addEventListener('resize', resizeConfetti);
-function launchConfetti() {
-    confettiPieces = [];
-    const colors = ['#fbbf24','#fcd34d','#10b981','#06b6d4','#f43f5e','#8b5cf6','#fff'];
-    for (let i = 0; i < 100; i++) {
-        confettiPieces.push({
-            x: confettiCanvas.width/2 + (Math.random()-0.5)*200,
-            y: confettiCanvas.height/2 - 100,
-            vx: (Math.random()-0.5)*14, vy: -Math.random()*14-4,
-            w: Math.random()*8+4, h: Math.random()*6+3,
-            color: colors[Math.floor(Math.random()*colors.length)],
-            rotation: Math.random()*360, rotSpeed: (Math.random()-0.5)*15,
-            gravity: 0.3+Math.random()*0.2, alpha: 1,
-            decay: 0.004+Math.random()*0.005
-        });
-    }
-    confettiActive = true; animateConfetti();
-}
-function animateConfetti() {
-    if (!confettiActive) return;
-    confCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    let alive = false;
-    confettiPieces.forEach(p => {
-        if (p.alpha <= 0) return;
-        alive = true;
-        p.x += p.vx; p.vy += p.gravity; p.y += p.vy;
-        p.vx *= 0.98; p.rotation += p.rotSpeed; p.alpha -= p.decay;
-        if (p.alpha < 0) p.alpha = 0;
-        confCtx.save();
-        confCtx.translate(p.x, p.y);
-        confCtx.rotate((p.rotation * Math.PI) / 180);
-        confCtx.globalAlpha = p.alpha;
-        confCtx.fillStyle = p.color;
-        confCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-        confCtx.restore();
-    });
-    if (alive) requestAnimationFrame(animateConfetti);
-    else { confettiActive = false; confCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
-}
-
-// ===== اهتزاز =====
-function haptic(style) { try { if (tgApp && tgApp.HapticFeedback) tgApp.HapticFeedback.impactOccurred(style); } catch(e) {} }
-
-// ===== تغيير الرصيد العائم =====
-function showBalanceChange(amount, isWin) {
-    const panel = document.getElementById('userPanel');
-    const el = document.createElement('div');
-    el.className = 'balance-change ' + (isWin ? 'win' : 'lose-c');
-    el.textContent = (isWin ? '+' : '-') + amount.toLocaleString();
-    el.style.left = '50%'; el.style.top = '10px'; el.style.transform = 'translateX(-50%)';
-    panel.style.position = 'relative';
-    panel.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.remove(); }, 1600);
-}
-
-// ===== نظام التكات =====
-let tickRAF = null;
-function startTickSound(durationMs) {
-    stopTickSound();
-    const startTime = performance.now();
-    let lastTickTime = 0;
-    const ptr = document.getElementById('pointerBox');
-    function tick(now) {
-        const elapsed = now - startTime;
-        if (elapsed >= durationMs) { stopTickSound(); return; }
-        const progress = elapsed / durationMs;
-        const interval = 80 + progress * progress * 420;
-        if (elapsed - lastTickTime >= interval) {
-            playTick();
-            ptr.classList.remove('bounce');
-            void ptr.offsetWidth;
-            ptr.classList.add('bounce');
-            lastTickTime = elapsed;
-            if (Math.random() > 0.6) haptic('light');
-        }
-        tickRAF = requestAnimationFrame(tick);
-    }
-    tickRAF = requestAnimationFrame(tick);
-}
-function stopTickSound() { if (tickRAF) { cancelAnimationFrame(tickRAF); tickRAF = null; } }
-
-// ===== تيليجرام =====
-async function initTelegram() {
-    try {
-        tgApp = window.Telegram.WebApp;
-        tgApp.ready(); tgApp.expand();
-        if (tgApp.initDataUnsafe && tgApp.initDataUnsafe.user) {
-            state.userId = tgApp.initDataUnsafe.user.id;
-            await fetchUserData();
-        } else {
-            showToast("يجب فتح الموقع من البوت");
-            document.getElementById('btnSpin').disabled = true;
-            document.getElementById('btnSpin').innerHTML = "🚫<br>ممنوع";
-            document.getElementById('displayUsername').textContent = "زائر";
-            document.getElementById('displayBalance').textContent = "0";
-        }
-    } catch(e) { console.error(e); }
-}
-async function fetchUserData() {
-    try {
-        const res = await fetch(CONFIG.baseUrl + '/api/get_me', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: state.userId })
-        });
-        const data = await res.json();
-        if (data.success) {
-            state.balance = data.balance;
-            state.hasFreeSpin = data.has_free_spin;
-            state.jackpot = data.jackpot;
-            state.userName = data.username || "مستخدم";
-            document.getElementById('displayUsername').textContent = state.userName;
-            updateUI();
-        } else {
-            showToast("أنت غير مسجل في البوت");
-            document.getElementById('btnSpin').disabled = true;
-            document.getElementById('btnSpin').innerHTML = "سجل<br>أولاً";
-            document.getElementById('displayUsername').textContent = "غير مسجل";
-            document.getElementById('displayBalance').textContent = "0";
-        }
-    } catch(e) { showToast("فشل الاتصال بالسيرفر"); }
-}
-
-// ===== مدة الدوران =====
-const SPIN_DURATION_MS = 5500;
-
-// ===== الدوران =====
-async function spin() {
-    if (state.isSpinning) return;
-    if (!state.userId) { showToast("يجب التسجيل أولاً"); return; }
-    if (!state.hasFreeSpin && state.balance < CONFIG.pricePerSpin) {
-        showToast('رصيد غير كافي');
-        haptic('heavy'); playLoseSound();
-        document.getElementById('userPanel').classList.add('shake');
-        setTimeout(() => document.getElementById('userPanel').classList.remove('shake'), 500);
-        return;
-    }
-    playClickSound(); haptic('medium');
-    state.isSpinning = true;
-    const btn = document.getElementById('btnSpin');
-    btn.disabled = true; btn.innerHTML = '...'; btn.classList.add('spinning');
-    startLEDFast();
-
-    try {
-        const res = await fetch(CONFIG.baseUrl + '/api/spin', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: state.userId, is_free_spin: state.hasFreeSpin })
-        });
-        const data = await res.json();
-        if (data.success) {
-            const oldBalance = state.balance;
-            state.balance = data.new_balance;
-            state.hasFreeSpin = data.has_free_spin;
-            state.jackpot = data.jackpot;
-            const prize = PRIZES[data.prize_index];
-            const winAmount = prize.type === 'cash' ? parseInt(prize.label.replace(/,/g, '')) : 0;
-            playSpinStart(); haptic('light');
-            animateWheel(data.prize_index, prize, winAmount, oldBalance);
-        } else {
-            showToast(data.message);
-            state.isSpinning = false; updateUI(); startLEDNormal();
-        }
-    } catch(e) {
-        showToast("خطأ اتصال");
-        state.isSpinning = false; updateUI(); startLEDNormal();
-    }
-}
-
-// ===== تحريك العجلة =====
-function animateWheel(targetIndex, prize, winAmount, oldBalance) {
-    const targetAbsolute = (((342 - targetIndex * SLICE_DEG) % 360) + 360) % 360;
-    const currentAbsolute = (((state.currentRotation % 360) + 360) % 360);
-    let diff = targetAbsolute - currentAbsolute;
-    if (diff <= 0) diff += 360;
-    const spins = 5 + Math.floor(Math.random() * 3);
-    const addedRotation = (spins * 360) + diff;
-    const prevRotation = state.currentRotation;
-    state.currentRotation += addedRotation;
-
-    canvas.style.transition = 'none';
-    canvas.style.transform = `rotate(${prevRotation}deg)`;
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            canvas.style.transition = `transform ${SPIN_DURATION_MS}ms cubic-bezier(0.15, 0.85, 0.25, 1)`;
-            canvas.style.transform = `rotate(${state.currentRotation}deg)`;
-        });
-    });
-
-    startTickSound(SPIN_DURATION_MS);
-
-    setTimeout(() => {
-        stopTickSound();
-        startLEDNormal();
-        document.getElementById('btnSpin').classList.remove('spinning');
-        handleResult(prize, winAmount, oldBalance);
-        state.isSpinning = false;
-        updateUI();
-    }, SPIN_DURATION_MS + 300);
-}
-
-function handleResult(prize, winAmount, oldBalance) {
-    const isLose = prize.type === 'lose';
-    const resultBox = document.getElementById('resultBox');
-    const resOkBtn = document.getElementById('resOkBtn');
-    resultBox.classList.toggle('lose-box', isLose);
-    resOkBtn.classList.toggle('lose-btn', isLose);
-    document.getElementById('resIcon').textContent = prize.icon;
-    document.getElementById('resTitle').textContent = isLose ? 'حظ أوفر' : 'مبروك!';
-    document.getElementById('resTitle').style.color = isLose ? 'var(--danger)' : 'var(--accent)';
-    document.getElementById('resPrize').textContent = prize.label + ' ' + prize.sub;
-    document.getElementById('resPrize').classList.toggle('lose-text', isLose);
-    document.getElementById('resSub').textContent = isLose ? 'حظاً أوفر في المرة القادمة' : 'تمت إضافتها لرصيدك';
-    const icon = document.getElementById('resIcon');
-    icon.style.animation = 'none'; void icon.offsetWidth; icon.style.animation = '';
-
-    if (isLose) {
-        playLoseSound(); haptic('heavy');
-        document.getElementById('wheelStage').classList.add('shake');
-        setTimeout(() => document.getElementById('wheelStage').classList.remove('shake'), 500);
-        showBalanceChange(CONFIG.pricePerSpin, false);
-    } else {
-        playWinSound(); haptic('success');
-        launchConfetti();
-        if (prize.type === 'cash') showBalanceChange(winAmount, true);
-        const glow = document.getElementById('wheelGlow');
-        glow.style.background = 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%)';
-        setTimeout(() => { glow.style.background = ''; }, 2000);
-    }
-    document.getElementById('modalResult').classList.add('show');
-}
-
-function hideModal() {
-    playClickSound();
-    document.getElementById('modalResult').classList.remove('show');
-}
-
-function updateUI() {
-    document.getElementById('displayBalance').textContent = state.balance.toLocaleString();
-    document.getElementById('displayJackpot').textContent = state.jackpot.toLocaleString();
-    const btn = document.getElementById('btnSpin');
-    btn.disabled = state.isSpinning;
-    btn.innerHTML = state.isSpinning ? '...' : (state.hasFreeSpin ? 'مجاني<br>دور' : 'دور<br>الآن');
-    btn.classList.toggle('free-spin-active', state.hasFreeSpin && !state.isSpinning);
-    document.getElementById('freeSpinStatus').classList.toggle('hidden', !state.hasFreeSpin);
-}
-
-function showToast(msg) {
-    const b = document.getElementById('toastBox');
-    b.textContent = msg; b.classList.add('show');
-    setTimeout(() => b.classList.remove('show'), 3000);
-}
-
-// ===== زر الصوت =====
-document.getElementById('soundToggle').addEventListener('click', () => {
-    state.soundOn = !state.soundOn;
-    document.getElementById('soundToggle').textContent = state.soundOn ? '🔊' : '🔇';
-    playClickSound();
-});
-
-// ===== تهيئة =====
-document.addEventListener('DOMContentLoaded', () => {
-    drawWheel();
-    initTelegram();
-    document.getElementById('btnSpin').addEventListener('click', spin);
-    const unlock = () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); };
-    document.body.addEventListener('click', unlock, { once: true });
-    document.body.addEventListener('touchstart', unlock, { once: true });
-});
-</script>
-</body>
-</html>
