@@ -175,11 +175,8 @@
             50% { opacity: 1; transform: scale(1.05); }
         }
         .pointer-box {
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
+            position: absolute; top: -24px; left: 50%;
+            transform: translateX(-50%); z-index: 50;
             filter: drop-shadow(0 4px 12px rgba(0,0,0,0.9));
         }
         .pointer-box.bounce { animation: pointerBounce 0.12s ease-out; }
@@ -220,10 +217,7 @@
             0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.4); }
             50% { box-shadow: 0 0 35px rgba(251,191,36,0.7); }
         }
-        .led-ring {
-            position: absolute; inset: -6px; border-radius: 50%;
-            z-index: 5; pointer-events: none;
-        }
+        .led-ring { position: absolute; inset: -6px; border-radius: 50%; z-index: 5; pointer-events: none; }
         .led-dot {
             position: absolute; width: 5px; height: 5px; border-radius: 50%;
             background: var(--accent);
@@ -266,9 +260,7 @@
             animation: iconEntry 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             animation-delay: 0.2s; opacity: 0; transform: scale(0);
         }
-        @keyframes iconEntry {
-            to { opacity: 1; transform: scale(1) rotate(10deg); }
-        }
+        @keyframes iconEntry { to { opacity: 1; transform: scale(1) rotate(10deg); } }
         .result-prize-text {
             font-size: 2rem; font-weight: 900;
             background: linear-gradient(180deg, #fef3c7, #f59e0b);
@@ -418,13 +410,12 @@
 <div class="toast" id="toastBox" role="alert"></div>
 
 <script>
-// ===== إعدادات =====
 const CONFIG = {
     pricePerSpin: 2500,
     baseUrl: 'https://unbegrudged-direfully-nu.ngrok-free.dev'
 };
 
-// ===== جوائز افتراضية (تُستبدل من السيرفر) =====
+/* جوائز افتراضية - تُستبدل فوراً من السيرفر */
 let PRIZES = [
     { label: '100,000', sub: 'ل.س', color: '#b91c1c', colorEnd: '#ef4444', type: 'cash', icon: '💎' },
     { label: '2,500', sub: 'ل.س', color: '#1e3a5f', colorEnd: '#3b82f6', type: 'cash', icon: '🪙' },
@@ -438,20 +429,36 @@ let PRIZES = [
     { label: 'حظ أوفر', sub: 'خسارة', color: '#1f2937', colorEnd: '#374151', type: 'lose', icon: '💔' },
 ];
 
-// ===== متغيرات هندسية ديناميكية =====
 let NUM_SLICES = PRIZES.length;
 let SLICE_DEG = 360 / NUM_SLICES;
-let HALF_SLICE_DEG = SLICE_DEG / 2;
 let sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
 
-function updateWheelGeometry() {
+function updateGeometry() {
     NUM_SLICES = PRIZES.length;
     SLICE_DEG = 360 / NUM_SLICES;
-    HALF_SLICE_DEG = SLICE_DEG / 2;
     sliceAngleRad = (2 * Math.PI) / NUM_SLICES;
 }
 
-// ===== حالة التطبيق =====
+/* جلب الجوائز الحية من السيرفر */
+async function loadPrizes() {
+    try {
+        const r = await fetch(CONFIG.baseUrl + '/api/get_prizes', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_id: state.userId || 0 })
+        });
+        const d = await r.json();
+        if (d.success && d.prizes && d.prizes.length >= 2) {
+            PRIZES = d.prizes.map(p => ({
+                label: p.label, sub: p.sub || 'ل.س',
+                color: p.color, colorEnd: p.color_end,
+                type: p.type || p.prize_type, icon: p.icon
+            }));
+            updateGeometry();
+            drawWheel();
+        }
+    } catch(e) { console.log('جوائز افتراضية'); }
+}
+
 let state = {
     balance: 0, jackpot: 15000000, isSpinning: false,
     currentRotation: 0, userId: null, userName: 'زائر',
@@ -459,141 +466,188 @@ let state = {
 };
 let tgApp = null;
 
-// ===== جلب الجوائز من السيرفر =====
-async function loadPrizes() {
-    try {
-        const res = await fetch(CONFIG.baseUrl + '/api/get_prizes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: state.userId || 0 })
-        });
-        const data = await res.json();
-        if (data.success && data.prizes && data.prizes.length > 0) {
-            PRIZES = data.prizes.map(p => ({
-                label: p.label,
-                sub: p.sub || 'ل.س',
-                color: p.color,
-                colorEnd: p.color_end,
-                type: p.type || p.prize_type,
-                icon: p.icon
-            }));
-            updateWheelGeometry();
-            drawWheel();
-        }
-    } catch(e) {
-        console.log('استخدام الجوائز الافتراضية');
-    }
-}
-
-// ===== نظام الصوت =====
+/* === صوت === */
 let audioCtx = null;
-function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-}
-function playTick() {
-    if (!state.soundOn) return;
-    try {
-        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.08);
-    } catch(e) {}
-}
-function playSpinStart() {
-    if (!state.soundOn) return;
-    try {
-        const ctx = getAudioCtx(); const noise = ctx.createBufferSource();
-        const buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
-        const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.3;
-        noise.buffer = buf; const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass'; filter.frequency.setValueAtTime(200, ctx.currentTime);
-        filter.frequency.exponentialRampToValueAtTime(2000, ctx.currentTime + 0.4); filter.Q.value = 2;
-        const gain = ctx.createGain(); gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-        noise.start(ctx.currentTime); noise.stop(ctx.currentTime + 0.5);
-    } catch(e) {}
-}
-function playWinSound() {
-    if (!state.soundOn) return;
-    try {
-        const ctx = getAudioCtx();
-        [523, 659, 784, 1047].forEach((freq, i) => {
-            const osc = ctx.createOscillator(); const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination); osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
-            gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
-            gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.12 + 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.4);
-            osc.start(ctx.currentTime + i * 0.12); osc.stop(ctx.currentTime + i * 0.12 + 0.4);
-        });
-    } catch(e) {}
-}
-function playLoseSound() {
-    if (!state.soundOn) return;
-    try {
-        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.12, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
-    } catch(e) {}
-}
-function playClickSound() {
-    if (!state.soundOn) return;
-    try {
-        const ctx = getAudioCtx(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.06);
-    } catch(e) {}
-}
+function getAC() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
+function playTick() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(1200,c.currentTime); o.frequency.exponentialRampToValueAtTime(800,c.currentTime+0.05); g.gain.setValueAtTime(0.15,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.08); o.start(c.currentTime); o.stop(c.currentTime+0.08); } catch(e){} }
+function playSpinStart() { if (!state.soundOn) return; try { const c=getAC(),n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*0.5,c.sampleRate),d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.3; n.buffer=b; const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(200,c.currentTime); f.frequency.exponentialRampToValueAtTime(2000,c.currentTime+0.4); f.Q.value=2; const g=c.createGain(); g.gain.setValueAtTime(0.3,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5); n.connect(f); f.connect(g); g.connect(c.destination); n.start(c.currentTime); n.stop(c.currentTime+0.5); } catch(e){} }
+function playWin() { if (!state.soundOn) return; try { const c=getAC(); [523,659,784,1047].forEach((fr,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='triangle'; o.frequency.setValueAtTime(fr,c.currentTime+i*0.12); g.gain.setValueAtTime(0,c.currentTime+i*0.12); g.gain.linearRampToValueAtTime(0.2,c.currentTime+i*0.12+0.03); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.12+0.4); o.start(c.currentTime+i*0.12); o.stop(c.currentTime+i*0.12+0.4); }); } catch(e){} }
+function playLose() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sawtooth'; o.frequency.setValueAtTime(300,c.currentTime); o.frequency.exponentialRampToValueAtTime(100,c.currentTime+0.5); g.gain.setValueAtTime(0.12,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5); o.start(c.currentTime); o.stop(c.currentTime+0.5); } catch(e){} }
+function playClick() { if (!state.soundOn) return; try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.type='sine'; o.frequency.setValueAtTime(600,c.currentTime); g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.06); o.start(c.currentTime); o.stop(c.currentTime+0.06); } catch(e){} }
 
-// ===== خلفية الجزيئات =====
-const bgCanvas = document.getElementById('bgCanvas');
-const bgCtx = bgCanvas.getContext('2d');
-let bgParticles = [];
-function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
-resizeBg();
-window.addEventListener('resize', resizeBg);
-function initBgParticles() {
-    bgParticles = [];
-    const count = Math.min(50, Math.floor(window.innerWidth * window.innerHeight / 18000));
-    for (let i = 0; i < count; i++) {
-        bgParticles.push({
-            x: Math.random() * bgCanvas.width, y: Math.random() * bgCanvas.height,
-            r: Math.random() * 1.5 + 0.3, vx: (Math.random() - 0.5) * 0.25,
-            vy: (Math.random() - 0.5) * 0.25 - 0.08, alpha: Math.random() * 0.35 + 0.1,
-            color: Math.random() > 0.7 ? '251,191,36' : (Math.random() > 0.5 ? '6,182,212' : '255,255,255')
-        });
-    }
-}
-initBgParticles();
-function drawBg() {
-    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-    bgParticles.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = bgCanvas.width; if (p.x > bgCanvas.width) p.x = 0;
-        if (p.y < 0) p.y = bgCanvas.height; if (p.y > bgCanvas.height) p.y = 0;
-        bgCtx.beginPath();
-        bgCtx.arc(p.x, p.y, Math.max(0.1, p.r), 0, Math.PI * 2);
-        bgCtx.fillStyle = `rgba(${p.color},${p.alpha})`; bgCtx.fill();
+/* === خلفية === */
+const bgC = document.getElementById('bgCanvas'), bgX = bgC.getContext('2d');
+let bgP = [];
+function rsBg() { bgC.width = innerWidth; bgC.height = innerHeight; }
+rsBg(); addEventListener('resize', rsBg);
+(function(){ const n=Math.min(50,Math.floor(innerWidth*innerHeight/18000)); for(let i=0;i<n;i++) bgP.push({x:Math.random()*bgC.width,y:Math.random()*bgC.height,r:Math.random()*1.5+0.3,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.25-0.08,a:Math.random()*0.35+0.1,c:Math.random()>0.7?'251,191,36':Math.random()>0.5?'6,182,212':'255,255,255'}); })();
+(function d(){ bgX.clearRect(0,0,bgC.width,bgC.height); bgP.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=bgC.width; if(p.x>bgC.width)p.x=0; if(p.y<0)p.y=bgC.height; if(p.y>bgC.height)p.y=0; bgX.beginPath(); bgX.arc(p.x,p.y,Math.max(0.1,p.r),0,Math.PI*2); bgX.fillStyle=`rgba(${p.c},${p.a})`; bgX.fill(); }); requestAnimationFrame(d); })();
+
+/* === LED === */
+let ledD=[],ledS=0,ledBI=null,ledFI=null;
+(function(){ const r=document.getElementById('ledRing'),w=340,cx=w/2,cy=w/2,rd=w/2+4; for(let i=0;i<30;i++){ const a=(i/30)*Math.PI*2-Math.PI/2,x=cx+rd*Math.cos(a)-2.5,y=cy+rd*Math.sin(a)-2.5,d=document.createElement('div'); d.className='led-dot'; d.style.left=x+'px'; d.style.top=y+'px'; r.appendChild(d); ledD.push(d); } })();
+function animLED(){ ledD.forEach((d,i)=>{ const on=(i+ledS)%3===0; d.classList.toggle('off',!on); if(on){ const c=['#fbbf24','#f59e0b','#fcd34d'][(i+ledS)%3]; d.style.background=c; d.style.boxShadow=`0 0 6px ${c}, 0 0 12px rgba(251,191,36,0.3)`; } }); ledS++; }
+function startLEDN(){ stopLEDF(); if(!ledBI) ledBI=setInterval(animLED,400); }
+function stopLEDN(){ if(ledBI){clearInterval(ledBI);ledBI=null;} }
+function startLEDF(){ stopLEDN(); if(!ledFI) ledFI=setInterval(animLED,80); }
+function stopLEDF(){ if(ledFI){clearInterval(ledFI);ledFI=null;} }
+startLEDN();
+
+/* === رسم العجلة === */
+const cv = document.getElementById('wheelCanvas'), cx = cv.getContext('2d');
+const cCX = cv.width/2, cCY = cv.height/2, wR = 155;
+
+function drawWheel() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    /* ظل */
+    cx.save(); cx.beginPath(); cx.arc(cCX, cCY+4, wR+4, 0, Math.PI*2);
+    cx.fillStyle='rgba(0,0,0,0.3)'; cx.filter='blur(8px)'; cx.fill(); cx.restore();
+    /* شرائح */
+    PRIZES.forEach((p, i) => {
+        const sa = i * sliceAngleRad - Math.PI/2, ea = sa + sliceAngleRad;
+        const gr = cx.createRadialGradient(cCX, cCY, 20, cCX, cCY, wR);
+        gr.addColorStop(0, p.colorEnd); gr.addColorStop(1, p.color);
+        cx.beginPath(); cx.moveTo(cCX, cCY); cx.arc(cCX, cCY, wR, sa, ea);
+        cx.closePath(); cx.fillStyle = gr; cx.fill();
+        cx.strokeStyle = 'rgba(0,0,0,0.5)'; cx.lineWidth = 2; cx.stroke();
+        /* نص */
+        cx.save(); cx.translate(cCX, cCY); cx.rotate(sa + sliceAngleRad/2);
+        cx.translate(wR * 0.68, 0); cx.rotate(Math.PI/2);
+        cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,0.8)'; cx.shadowBlur = 4;
+        cx.textAlign = 'center';
+        const fontSize = NUM_SLICES > 12 ? 11 : (NUM_SLICES > 8 ? 12 : 13);
+        cx.font = `${fontSize-1}px sans-serif`; cx.fillText(p.icon, 0, -16);
+        cx.font = `bold ${fontSize}px Tajawal`; cx.fillText(p.label, 0, -1);
+        cx.font = `${fontSize-4}px Tajawal`; cx.fillStyle = 'rgba(255,255,255,0.7)';
+        cx.fillText(p.sub, 0, 11);
+        cx.restore();
     });
-    requestAnimationFrame(drawBg);
+    /* حلقة خارجية */
+    cx.beginPath(); cx.arc(cCX, cCY, wR+2, 0, Math.PI*2);
+    cx.strokeStyle='rgba(251,191,36,0.3)'; cx.lineWidth=3; cx.stroke();
+    for(let i=0;i<40;i++){ const a=(i/40)*Math.PI*2, x=cCX+(wR+2)*Math.cos(a), y=cCY+(wR+2)*Math.sin(a);
+        cx.beginPath(); cx.arc(x,y,1.5,0,Math.PI*2);
+        cx.fillStyle=i%2===0?'rgba(251,191,36,0.6)':'rgba(255,255,255,0.2)'; cx.fill(); }
+    /* مركز */
+    const cg=cx.createRadialGradient(cCX,cCY,0,cCX,cCY,38);
+    cg.addColorStop(0,'#2a2a45'); cg.addColorStop(0.7,'#1a1a30'); cg.addColorStop(1,'#0f0f20');
+    cx.beginPath(); cx.arc(cCX,cCY,38,0,Math.PI*2); cx.fillStyle=cg; cx.fill();
+    cx.strokeStyle='rgba(251,191,36,0.5)'; cx.lineWidth=2.5; cx.stroke();
+    cx.beginPath(); cx.arc(cCX,cCY,30,0,Math.PI*2);
+    cx.strokeStyle='rgba(251,191,36,0.15)'; cx.lineWidth=1; cx.stroke();
 }
-drawBg();
 
-// ===== LED =====
-let ledDots = []; let ledState = 0; let ledBaseInterval = null; let ledFastInterval = null;
-function createLEDs() {
-    const ringEl = document.getElementById('ledRing');
-    const stageW = 340;
+/* === كونفيتي === */
+const ccV=document.getElementById('confettiCanvas'), ccX=ccV.getContext('2d');
+let ccP=[],ccA=false;
+function rsCC(){ccV.width=innerWidth;ccV.height=innerHeight;} rsCC(); addEventListener('resize',rsCC);
+function launchCC(){ ccP=[]; const cols=['#fbbf24','#fcd34d','#10b981','#06b6d4','#f43f5e','#8b5cf6','#fff']; for(let i=0;i<100;i++) ccP.push({x:ccV.width/2+(Math.random()-0.5)*200,y:ccV.height/2-100,vx:(Math.random()-0.5)*14,vy:-Math.random()*14-4,w:Math.random()*8+4,h:Math.random()*6+3,c:cols[Math.floor(Math.random()*cols.length)],r:Math.random()*360,rs:(Math.random()-0.5)*15,g:0.3+Math.random()*0.2,a:1,d:0.004+Math.random()*0.005}); ccA=true; aCC(); }
+function aCC(){ if(!ccA)return; ccX.clearRect(0,0,ccV.width,ccV.height); let alive=false; ccP.forEach(p=>{ if(p.a<=0)return; alive=true; p.x+=p.vx;p.vy+=p.g;p.y+=p.vy;p.vx*=0.98;p.r+=p.rs;p.a-=p.d; if(p.a<0)p.a=0; ccX.save();ccX.translate(p.x,p.y);ccX.rotate(p.r*Math.PI/180);ccX.globalAlpha=p.a;ccX.fillStyle=p.c;ccX.fillRect(-p.w/2,-p.h/2,p.w,p.h);ccX.restore(); }); if(alive)requestAnimationFrame(aCC); else{ccA=false;ccX.clearRect(0,0,ccV.width,ccV.height);} }
+
+/* === مساعدات === */
+function haptic(s){ try{if(tgApp&&tgApp.HapticFeedback)tgApp.HapticFeedback.impactOccurred(s);}catch(e){} }
+function showBC(amt,win){ const p=document.getElementById('userPanel'),e=document.createElement('div'); e.className='balance-change '+(win?'win':'lose-c'); e.textContent=(win?'+':'-')+amt.toLocaleString(); e.style.left='50%'; e.style.top='10px'; e.style.transform='translateX(-50%)'; p.style.position='relative'; p.appendChild(e); setTimeout(()=>{if(e.parentNode)e.remove();},1600); }
+
+let tickRAF=null;
+function startTick(dur){ stopTick(); const st=performance.now(); let lt=0; const ptr=document.getElementById('pointerBox'); function t(now){ const el=now-st; if(el>=dur){stopTick();return;} const pr=el/dur,iv=80+pr*pr*420; if(el-lt>=iv){ playTick(); ptr.classList.remove('bounce'); void ptr.offsetWidth; ptr.classList.add('bounce'); lt=el; if(Math.random()>0.6)haptic('light'); } tickRAF=requestAnimationFrame(t); } tickRAF=requestAnimationFrame(t); }
+function stopTick(){ if(tickRAF){cancelAnimationFrame(tickRAF);tickRAF=null;} }
+
+/* === تيليجرام === */
+async function initTG(){
+    try{
+        tgApp=window.Telegram.WebApp; tgApp.ready(); tgApp.expand();
+        if(tgApp.initDataUnsafe&&tgApp.initDataUnsafe.user){
+            state.userId=tgApp.initDataUnsafe.user.id;
+            await loadPrizes();
+            await fetchUD();
+        } else {
+            showToast("يجب فتح الموقع من البوت");
+            document.getElementById('btnSpin').disabled=true;
+            document.getElementById('btnSpin').innerHTML="🚫<br>ممنوع";
+            document.getElementById('displayUsername').textContent="زائر";
+            document.getElementById('displayBalance').textContent="0";
+        }
+    } catch(e){console.error(e);}
+}
+async function fetchUD(){
+    try{
+        const r=await fetch(CONFIG.baseUrl+'/api/get_me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:state.userId})});
+        const d=await r.json();
+        if(d.success){ state.balance=d.balance; state.hasFreeSpin=d.has_free_spin; state.jackpot=d.jackpot; state.userName=d.username||"مستخدم"; document.getElementById('displayUsername').textContent=state.userName; updateUI(); }
+        else{ showToast("أنت غير مسجل"); document.getElementById('btnSpin').disabled=true; document.getElementById('displayUsername').textContent="غير مسجل"; document.getElementById('displayBalance').textContent="0"; }
+    } catch(e){ showToast("فشل الاتصال"); }
+}
+
+const SPIN_MS = 5500;
+
+async function spin(){
+    if(state.isSpinning) return;
+    if(!state.userId){showToast("سجل أولاً");return;}
+    if(!state.hasFreeSpin&&state.balance<CONFIG.pricePerSpin){ showToast('رصيد غير كافي'); haptic('heavy'); playLose(); document.getElementById('userPanel').classList.add('shake'); setTimeout(()=>document.getElementById('userPanel').classList.remove('shake'),500); return; }
+    playClick(); haptic('medium'); state.isSpinning=true;
+    const btn=document.getElementById('btnSpin'); btn.disabled=true; btn.innerHTML='...'; btn.classList.add('spinning'); startLEDF();
+    try{
+        const r=await fetch(CONFIG.baseUrl+'/api/spin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:state.userId,is_free_spin:state.hasFreeSpin})});
+        const d=await r.json();
+        if(d.success){
+            const ob=state.balance; state.balance=d.new_balance; state.hasFreeSpin=d.has_free_spin; state.jackpot=d.jackpot;
+            const prize=PRIZES[d.prize_index]; const wa=prize.type==='cash'?parseInt(prize.label.replace(/,/g,'')):0;
+            playSpinStart(); haptic('light'); animateW(d.prize_index,prize,wa,ob);
+        } else { showToast(d.message); state.isSpinning=false; updateUI(); startLEDN(); }
+    } catch(e){ showToast("خطأ اتصال"); state.isSpinning=false; updateUI(); startLEDN(); }
+}
+
+function animateW(ti,prize,wa,ob){
+    const ta=((342-ti*SLICE_DEG)%360+360)%360;
+    const ca=((state.currentRotation%360)+360)%360;
+    let df=ta-ca; if(df<=0)df+=360;
+    const sp=5+Math.floor(Math.random()*3);
+    const add=(sp*360)+df;
+    const prev=state.currentRotation;
+    state.currentRotation+=add;
+    cv.style.transition='none'; cv.style.transform=`rotate(${prev}deg)`;
+    requestAnimationFrame(()=>{requestAnimationFrame(()=>{
+        cv.style.transition=`transform ${SPIN_MS}ms cubic-bezier(0.15,0.85,0.25,1)`;
+        cv.style.transform=`rotate(${state.currentRotation}deg)`;
+    });});
+    startTick(SPIN_MS);
+    setTimeout(()=>{ stopTick(); startLEDN(); document.getElementById('btnSpin').classList.remove('spinning'); handleRes(prize,wa,ob); state.isSpinning=false; updateUI(); },SPIN_MS+300);
+}
+
+function handleRes(prize,wa,ob){
+    const isL=prize.type==='lose';
+    const rb=document.getElementById('resultBox'), ro=document.getElementById('resOkBtn');
+    rb.classList.toggle('lose-box',isL); ro.classList.toggle('lose-btn',isL);
+    document.getElementById('resIcon').textContent=prize.icon;
+    document.getElementById('resTitle').textContent=isL?'حظ أوفر':'مبروك!';
+    document.getElementById('resTitle').style.color=isL?'var(--danger)':'var(--accent)';
+    document.getElementById('resPrize').textContent=prize.label+' '+prize.sub;
+    document.getElementById('resPrize').classList.toggle('lose-text',isL);
+    document.getElementById('resSub').textContent=isL?'حظاً أوفر في المرة القادمة':'تمت إضافتها لرصيدك';
+    const ic=document.getElementById('resIcon'); ic.style.animation='none'; void ic.offsetWidth; ic.style.animation='';
+    if(isL){ playLose(); haptic('heavy'); document.getElementById('wheelStage').classList.add('shake'); setTimeout(()=>document.getElementById('wheelStage').classList.remove('shake'),500); showBC(CONFIG.pricePerSpin,false); }
+    else{ playWin(); haptic('success'); launchCC(); if(prize.type==='cash') showBC(wa,true); const gl=document.getElementById('wheelGlow'); gl.style.background='radial-gradient(circle,rgba(251,191,36,0.4) 0%,transparent 70%)'; setTimeout(()=>{gl.style.background='';},2000); }
+    document.getElementById('modalResult').classList.add('show');
+}
+function hideModal(){ playClick(); document.getElementById('modalResult').classList.remove('show'); }
+function updateUI(){
+    document.getElementById('displayBalance').textContent=state.balance.toLocaleString();
+    document.getElementById('displayJackpot').textContent=state.jackpot.toLocaleString();
+    const btn=document.getElementById('btnSpin'); btn.disabled=state.isSpinning;
+    btn.innerHTML=state.isSpinning?'...':(state.hasFreeSpin?'مجاني<br>دور':'دور<br>الآن');
+    btn.classList.toggle('free-spin-active',state.hasFreeSpin&&!state.isSpinning);
+    document.getElementById('freeSpinStatus').classList.toggle('hidden',!state.hasFreeSpin);
+}
+function showToast(m){ const b=document.getElementById('toastBox'); b.textContent=m; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),3000); }
+document.getElementById('soundToggle').addEventListener('click',()=>{ state.soundOn=!state.soundOn; document.getElementById('soundToggle').textContent=state.soundOn?'🔊':'🔇'; playClick(); });
+
+document.addEventListener('DOMContentLoaded',()=>{
+    drawWheel(); initTG();
+    document.getElementById('btnSpin').addEventListener('click',spin);
+    const u=()=>{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();};
+    document.body.addEventListener('click',u,{once:true});
+    document.body.addEventListener('touchstart',u,{once:true});
+});
+</script>
+</body>
+</html>
